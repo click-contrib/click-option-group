@@ -23,7 +23,7 @@ setup(
     name='click-option-group',
     version=get_version(),
     packages=find_packages(exclude='tests'),
-    python_requires='>=3.5,<4',
+    python_requires='>=3.6,<4',
     install_requires=[
         'Click>=7.0',
     ],
