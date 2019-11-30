@@ -31,7 +31,7 @@ class GroupedOption(click.Option):
 
 
 class OptionGroup:
-    """Represents the abstraction for grouped (related) options
+    """Option group manages grouped (related) options
     """
 
     def __init__(self, name: ty.Optional[str] = None, *, requied: bool = False) -> None:
@@ -76,10 +76,6 @@ class OptionGroup:
         return decorator
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
-        self.check_required(
-            'At least one option from the following option group is required', option, ctx, opts)
-
-    def check_required(self, message, option, ctx, opts):
         if not self.required:
             return
         if option.name in opts:
@@ -88,13 +84,12 @@ class OptionGroup:
         options = self._get_options(ctx)
 
         if not set(options).intersection(opts):
-            error_text = f'{message}:\n'
-
+            error_text = 'At least one option from the following option group is required:'
             if self.name:
-                error_text += f'{self.name}:'
+                error_text += f'\n{self.name}:'
 
-            for group_opt in options.values():
-                error_text += f'\n  {group_opt.get_error_hint(ctx)}'
+            for opt in options.values():
+                error_text += f'\n  {opt.get_error_hint(ctx)}'
 
             raise click.UsageError(error_text, ctx=ctx)
 
@@ -116,3 +111,32 @@ class OptionGroup:
 
     def _get_options(self, ctx):
         return self._options.get(ctx.command.callback, {})
+
+
+class MutuallyExclusiveOptionGroup(OptionGroup):
+    """Option group with mutually exclusive behavior for grouped options
+    """
+
+    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
+        options = self._get_options(ctx)
+        given_option_names = set(options).intersection(opts)
+
+        if self.required and not given_option_names:
+            error_text = f'One required option must be set from the mutually exclusive option group:'
+            if self.name:
+                error_text += f'\n{self.name}:'
+
+            for option in options.values():
+                opt_err_hint = option.get_error_hint(ctx)
+                error_text += f'\n  {opt_err_hint}'
+
+            raise click.UsageError(error_text, ctx=ctx)
+
+        if len(given_option_names) > 1:
+            error_text = f'The given mutually exclusive options cannot be used at the same time:'
+
+            for opt_name in given_option_names:
+                opt_err_hint = options[opt_name].get_error_hint(ctx)
+                error_text += f'\n  {opt_err_hint}'
+
+            raise click.UsageError(error_text, ctx=ctx)
