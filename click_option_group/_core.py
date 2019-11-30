@@ -18,6 +18,10 @@ class GroupedOption(click.Option):
 
     @property
     def group(self) -> 'OptionGroup':
+        """Returns the group for this option
+
+        :return: [OptionGroup] the group for this option
+        """
         return self.__group()
 
     def handle_parse_result(self, ctx, opts, args):
