@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import typing as ty
-import warnings
 import weakref
 
 import click
@@ -12,9 +11,17 @@ class GroupedOption(click.Option):
     """Represents grouped (related) optional values
     """
 
+    _forbidden_attrs = (
+        'required',
+    )
+
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
-        super().__init__(param_decls, **attrs)
+        for attr in self._forbidden_attrs:
+            if attr in attrs:
+                raise TypeError(f"'{attr}' attribute is not allowed for '{type(self).__name__}'.")
+
         self.__group = weakref.ref(group)
+        super().__init__(param_decls, **attrs)
 
     @property
     def group(self) -> 'OptionGroup':
@@ -62,8 +69,6 @@ class OptionGroup:
         """
         def decorator(func):
             option_attrs = attrs.copy()
-
-            self._ignore_argument('required', option_attrs)
             option_attrs.setdefault('cls', GroupedOption)
 
             if not issubclass(option_attrs['cls'], GroupedOption):
@@ -92,13 +97,6 @@ class OptionGroup:
                 error_text += f'\n  {opt.get_error_hint(ctx)}'
 
             raise click.UsageError(error_text, ctx=ctx)
-
-    @staticmethod
-    def _ignore_argument(name: str, attrs: dict):
-        if name in attrs:
-            del attrs[name]
-            warnings.warn(f"'{name}' argument is ignored for group's option.",
-                          UserWarning, stacklevel=2)
 
     def _option_memo(self, func):
         if isinstance(func, click.Command):
