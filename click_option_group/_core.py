@@ -26,7 +26,7 @@ class GroupedOption(click.Option):
 
     def handle_parse_result(self, ctx, opts, args):
         with augment_usage_errors(ctx, param=self):
-            self.group.before_handle_parse_result(self, ctx, opts)
+            self.group.handle_parse_result(self, ctx, opts)
         return super().handle_parse_result(ctx, opts, args)
 
 
@@ -75,7 +75,7 @@ class OptionGroup:
 
         return decorator
 
-    def before_handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
+    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
         self.check_required(
             'At least one option from the following option group is required', option, ctx, opts)
 
