@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ._version import __version__  # noqa
-from ._optiongroup import GroupedOption, OptionGroup
+from ._core import GroupedOption, OptionGroup
 
 
 __all__ = [
