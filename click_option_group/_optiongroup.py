@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import typing as ty
 import warnings
 import weakref
-import typing as ty
 
 import click
 from click.core import augment_usage_errors
@@ -33,8 +33,6 @@ class OptionGroup:
     def __init__(self, name: ty.Optional[str] = None, *, requied: bool = False) -> None:
         self._name = name if name else ''
         self._requied = requied
-
-        self._command = None
         self._options = {}
 
     @property
@@ -67,12 +65,6 @@ class OptionGroup:
             if not issubclass(option_attrs['cls'], GroupedOption):
                 raise TypeError("'cls' argument must be a subclass of 'GroupedOption' class.")
 
-            if self._command:
-                if func is not self._command:
-                    raise ValueError(f"Option group '{self}' is already used for '{self._command}'.")
-            else:
-                self._command = func
-
             func = click.option(*param_decls, group=self, **option_attrs)(func)
             self._option_memo(func)
             return func
@@ -88,13 +80,16 @@ class OptionGroup:
             return
         if option.name in opts:
             return
-        if not set(self._options).intersection(opts):
+
+        options = self._get_options(ctx)
+
+        if not set(options).intersection(opts):
             error_text = f'{message}:\n'
 
             if self.name:
                 error_text += f'{self.name}:'
 
-            for group_opt in self._options.values():
+            for group_opt in options.values():
                 error_text += f'\n  {group_opt.get_error_hint(ctx)}'
 
             raise click.UsageError(error_text, ctx=ctx)
@@ -109,7 +104,11 @@ class OptionGroup:
     def _option_memo(self, func):
         if isinstance(func, click.Command):
             option: click.Option = func.params[-1]
+            func = func.callback
         else:
             option: click.Option = func.__click_params__[-1]
 
-        self._options[option.name] = option
+        self._options.setdefault(func, {})[option.name] = option
+
+    def _get_options(self, ctx):
+        return self._options.get(ctx.command.callback, {})
