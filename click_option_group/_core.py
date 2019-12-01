@@ -36,6 +36,24 @@ class GroupedOption(click.Option):
             self.group.handle_parse_result(self, ctx, opts)
         return super().handle_parse_result(ctx, opts, args)
 
+    def get_help_record(self, ctx: click.Context):
+        opts, opt_help = super().get_help_record(ctx)
+
+        group_option_names = list(self.group.get_options(ctx))
+        group_option_names.reverse()
+
+        indent_inc = ctx.make_formatter().indent_increment
+        indent = ' ' * indent_inc
+
+        if self.name == group_option_names[0]:
+            group_name, group_help = self.group.get_help_record(ctx)
+            opts = f'\n{indent}{group_name}:\n{indent*2}{opts}'
+            opt_help = f'{opt_help}'
+        else:
+            opts = f'{indent}{opts}'
+
+        return opts, opt_help
+
 
 class OptionGroup:
     """Option group manages grouped (related) options
