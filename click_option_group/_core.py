@@ -41,8 +41,10 @@ class OptionGroup:
     """Option group manages grouped (related) options
     """
 
-    def __init__(self, name: ty.Optional[str] = None, *, requied: bool = False) -> None:
+    def __init__(self, name: ty.Optional[str] = None, description: ty.Optional[str] = None, *,
+                 requied: bool = False) -> None:
         self._name = name if name else ''
+        self._description = description if description else ''
         self._requied = requied
         self._options = {}
 
@@ -55,6 +57,14 @@ class OptionGroup:
         return self._name
 
     @property
+    def description(self) -> str:
+        """Returns the group description or empty string if it was not set
+
+        :return: group description
+        """
+        return self._description
+
+    @property
     def required(self) -> bool:
         """Returns 'required' flag
 
@@ -63,6 +73,33 @@ class OptionGroup:
         :return: required flag
         """
         return self._requied
+
+    def get_default_name(self, ctx: click.Context) -> str:
+        """Returns default name for the group
+
+        :param ctx: Click Context object
+        :return: group default name
+        """
+        if self.name:
+            return self.name
+
+        option_names = reversed(list(self.get_options(ctx)))
+        option_names = '|'.join(option_names)
+        return f'({option_names})'
+
+    def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
+        """Returns the help record for the group
+
+        :param ctx: Click Context object
+        :return: the tuple of two fileds: (name, description)
+        """
+        name = self.get_default_name(ctx)
+        descr = self.description if self.description else ''
+
+        if self.required:
+            name += ' [required]'
+
+        return name, descr
 
     def option(self, *param_decls, **attrs):
         """Decorator attaches an grouped option to the command
@@ -74,6 +111,7 @@ class OptionGroup:
             if not issubclass(option_attrs['cls'], GroupedOption):
                 raise TypeError("'cls' argument must be a subclass of 'GroupedOption' class.")
 
+            self._check_decorated_order(func)
             func = click.option(*param_decls, group=self, **option_attrs)(func)
             self._option_memo(func)
             return func
@@ -86,28 +124,49 @@ class OptionGroup:
         if option.name in opts:
             return
 
-        options = self._get_options(ctx)
+        options = self.get_options(ctx)
 
         if not set(options).intersection(opts):
-            error_text = 'At least one option from the following option group is required:'
-            if self.name:
-                error_text += f'\n{self.name}:'
+            error_text = f'At least one option from "{self.get_default_name(ctx)}" option group is required:'
 
-            for opt in options.values():
+            for opt in reversed(list(options.values())):
                 error_text += f'\n  {opt.get_error_hint(ctx)}'
 
             raise click.UsageError(error_text, ctx=ctx)
 
-    def _option_memo(self, func):
+    def _check_decorated_order(self, func):
         if isinstance(func, click.Command):
-            option: click.Option = func.params[-1]
+            params = func.params
             func = func.callback
         else:
-            option: click.Option = func.__click_params__[-1]
+            params = getattr(func, '__click_params__', [])
 
+        if not params or func not in self._options:
+            return
+
+        last_param = params[-1]
+        options = self._options[func]
+
+        if last_param.name not in options:
+            hint_list = last_param.opts or [last_param.human_readable_name]
+
+            raise ValueError((
+                "Group's options must not be mixed with "
+                "other options while adding by decorator. "
+                f"Check decorator position for {hint_list} option."
+            ))
+
+    def _option_memo(self, func):
+        if isinstance(func, click.Command):
+            params = func.params
+            func = func.callback
+        else:
+            params = func.__click_params__
+
+        option: GroupedOption = params[-1]
         self._options.setdefault(func, {})[option.name] = option
 
-    def _get_options(self, ctx):
+    def get_options(self, ctx: click.Context) -> dict:
         return self._options.get(ctx.command.callback, {})
 
 
@@ -115,16 +174,26 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
     """Option group with mutually exclusive behavior for grouped options
     """
 
+    def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
+        name = self.get_default_name(ctx)
+        descr = self.description if self.description else ''
+
+        if self.required:
+            name += ' [mutually_exclusive, required]'
+        else:
+            name += ' [mutually_exclusive]'
+
+        return name, descr
+
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
-        options = self._get_options(ctx)
+        options = self.get_options(ctx)
         given_option_names = set(options).intersection(opts)
 
         if self.required and not given_option_names:
-            error_text = f'One required option must be set from the mutually exclusive option group:'
-            if self.name:
-                error_text += f'\n{self.name}:'
+            error_text = ('One required option must be set from '
+                          f'the mutually exclusive option group "{self.get_default_name(ctx)}":')
 
-            for option in options.values():
+            for option in reversed(list(options.values())):
                 opt_err_hint = option.get_error_hint(ctx)
                 error_text += f'\n  {opt_err_hint}'
 
