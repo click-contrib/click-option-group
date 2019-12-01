@@ -130,7 +130,7 @@ class OptionGroup:
             if not issubclass(option_attrs['cls'], GroupedOption):
                 raise TypeError("'cls' argument must be a subclass of 'GroupedOption' class.")
 
-            self._check_decorated_order(func)
+            self._check_mixing_decorators(func)
             func = click.option(*param_decls, group=self, **option_attrs)(func)
             self._option_memo(func)
 
@@ -177,7 +177,7 @@ class OptionGroup:
 
         return func, params
 
-    def _check_decorated_order(self, func):
+    def _check_mixing_decorators(self, func):
         func, params = self._get_callback_and_params(func)
 
         if not params or func not in self._options:
