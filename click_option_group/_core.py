@@ -16,14 +16,11 @@ class GroupedOption(click.Option):
     """Represents grouped (related) optional values
     """
 
-    _forbidden_attrs = (
-        'required',
-    )
-
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
-        for attr in self._forbidden_attrs:
+        for attr in group.forbidden_option_attrs:
             if attr in attrs:
-                raise TypeError(f"'{attr}' attribute is not allowed for '{type(self).__name__}'.")
+                raise TypeError(
+                    f"'{attr}' attribute is not allowed for '{type(group).__name__}' options.")
 
         self.__group = weakref.ref(group)
         super().__init__(param_decls, **attrs)
@@ -61,11 +58,10 @@ class OptionGroup:
     """Option group manages grouped (related) options
     """
 
-    def __init__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None, *,
-                 required: bool = False) -> None:
+    def __init__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None) -> None:
         self._name = name if name else ''
         self._help = help if help else ''
-        self._required = required
+
         self._options = {}
         self._fake_helper_options = {}
 
@@ -78,7 +74,7 @@ class OptionGroup:
         return self._name
 
     @property
-    def description(self) -> str:
+    def help(self) -> str:
         """Returns the group help or empty string if it was not set
 
         :return: group help
@@ -86,18 +82,12 @@ class OptionGroup:
         return self._help
 
     @property
-    def required(self) -> bool:
-        """Returns 'required' flag
-
-        If 'required' is True, at least one option from the group must be set.
-
-        :return: required flag
-        """
-        return self._required
+    def name_extra(self) -> ty.List[str]:
+        return []
 
     @property
-    def name_extra(self) -> ty.List[str]:
-        return ['required'] if self.required else []
+    def forbidden_option_attrs(self) -> ty.List[str]:
+        return []
 
     def get_default_name(self, ctx: click.Context) -> str:
         """Returns default name for the group
@@ -108,9 +98,8 @@ class OptionGroup:
         if self.name:
             return self.name
 
-        option_names = reversed(list(self.get_options(ctx)))
-        option_names = '|'.join(option_names)
-        return f'{option_names}'
+        option_names = '|'.join(self.get_option_names(ctx))
+        return f'({option_names})'
 
     def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
         """Returns the help record for the group
@@ -120,15 +109,15 @@ class OptionGroup:
         """
 
         name = self.get_default_name(ctx)
-        descr = self.description if self.description else ''
+        help_ = self.help if self.help else ''
 
         extra = ', '.join(self.name_extra)
         if extra:
             extra = f'[{extra}]'
 
-        name = f'({name}) GROUP {extra}'
+        name = f'{name}: {extra}'
 
-        return name, descr
+        return name, help_
 
     def option(self, *param_decls, **attrs):
         """Decorator attaches an grouped option to the command
@@ -155,6 +144,9 @@ class OptionGroup:
     def get_options(self, ctx: click.Context) -> dict:
         return self._options.get(ctx.command.callback, {})
 
+    def get_option_names(self, ctx: click.Context) -> ty.List[str]:
+        return list(reversed(list(self.get_options(ctx))))
+
     def get_fake_option(self, ctx: click.Context) -> ty.Optional[GroupedOption]:
         return self._fake_helper_options.get(ctx.command.callback)
 
@@ -173,18 +165,7 @@ class OptionGroup:
         return text
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
-        if not self.required:
-            return
-        if option.name in opts:
-            return
-
-        option_names = set(self.get_options(ctx))
-
-        if not option_names.intersection(opts):
-            error_text = f'None of the required options are set from "{self.get_default_name(ctx)}" option group:'
-            error_text += f'\n{self.get_error_hint(ctx)}'
-
-            raise click.UsageError(error_text, ctx=ctx)
+        pass
 
     @staticmethod
     def _get_callback_and_params(func):
@@ -241,16 +222,42 @@ class OptionGroup:
         self._options.setdefault(func, {})[option.name] = option
 
 
+class RequiredAnyOptionGroup(OptionGroup):
+    """Option group with required any options of this group
+    """
+
+    @property
+    def forbidden_option_attrs(self) -> ty.List[str]:
+        return ['required']
+
+    @property
+    def name_extra(self) -> ty.List[str]:
+        return super().name_extra + ['required_any']
+
+    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
+        if option.name in opts:
+            return
+
+        option_names = set(self.get_options(ctx))
+
+        if not option_names.intersection(opts):
+            error_text = f'None of the required options are set from "{self.get_default_name(ctx)}" option group:'
+            error_text += f'\n{self.get_error_hint(ctx)}'
+
+            raise click.UsageError(error_text, ctx=ctx)
+
+
 class RequiredAllOptionGroup(OptionGroup):
     """Option group with required all options of this group
     """
 
-    def __init__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None) -> None:
-        super().__init__(name, help, required=True)
+    @property
+    def forbidden_option_attrs(self) -> ty.List[str]:
+        return ['required']
 
     @property
     def name_extra(self) -> ty.List[str]:
-        return ['required_all']
+        return super().name_extra + ['required_all']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
         option_names = set(self.get_options(ctx))
@@ -268,18 +275,42 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
     """Option group with mutually exclusive behavior for grouped options
     """
 
+    def __init__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None, *,
+                 required: bool = False) -> None:
+        super().__init__(name, help)
+        self._required = required
+
+    @property
+    def required(self) -> bool:
+        """Returns 'required' flag
+
+        If 'required' is True, at least one option from the group must be set.
+
+        :return: required flag
+        """
+        return self._required
+
+    @property
+    def forbidden_option_attrs(self) -> ty.List[str]:
+        return ['required']
+
     @property
     def name_extra(self) -> ty.List[str]:
-        return super().name_extra + ['mutually_exclusive']
+        required = ['required'] if self.required else []
+        return super().name_extra + ['mutually_exclusive'] + required
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
-        super().handle_parse_result(option, ctx, opts)
+        option_names = set(self.get_options(ctx))
+        given_option_names = option_names.intersection(opts)
+        given_option_count = len(given_option_names)
 
-        options = self.get_options(ctx)
-        given_option_names = set(options).intersection(opts)
-
-        if len(given_option_names) > 1:
+        if given_option_count > 1:
             error_text = f'The given mutually exclusive options cannot be used at the same time:'
             error_text += f'\n{self.get_error_hint(ctx, given_option_names)}'
+            raise click.UsageError(error_text, ctx=ctx)
 
+        elif self.required and given_option_count == 0:
+            error_text = ('None of the required mutually exclusive options are set from '
+                          f'"{self.get_default_name(ctx)}" option group:')
+            error_text += f'\n{self.get_error_hint(ctx)}'
             raise click.UsageError(error_text, ctx=ctx)

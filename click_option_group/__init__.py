@@ -5,6 +5,7 @@ from ._version import __version__  # noqa
 from ._core import (
     GroupedOption,
     OptionGroup,
+    RequiredAnyOptionGroup,
     RequiredAllOptionGroup,
     MutuallyExclusiveOptionGroup
 )
@@ -13,6 +14,7 @@ from ._core import (
 __all__ = [
     'GroupedOption',
     'OptionGroup',
+    'RequiredAnyOptionGroup',
     'RequiredAllOptionGroup',
     'MutuallyExclusiveOptionGroup',
 ]
