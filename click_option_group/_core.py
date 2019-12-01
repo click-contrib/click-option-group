@@ -145,7 +145,7 @@ class OptionGroup:
         options = self.get_options(ctx)
 
         if not set(options).intersection(opts):
-            error_text = f'At least one option from "{self.get_default_name(ctx)}" option group is required:'
+            error_text = f'None of the required options are set from "{self.get_default_name(ctx)}" option group:'
 
             for opt in reversed(list(options.values())):
                 error_text += f'\n  {opt.get_error_hint(ctx)}'
@@ -204,18 +204,10 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
         return name, descr
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
+        super().handle_parse_result(option, ctx, opts)
+
         options = self.get_options(ctx)
         given_option_names = set(options).intersection(opts)
-
-        if self.required and not given_option_names:
-            error_text = ('One required option must be set from '
-                          f'the mutually exclusive option group "{self.get_default_name(ctx)}":')
-
-            for option in reversed(list(options.values())):
-                opt_err_hint = option.get_error_hint(ctx)
-                error_text += f'\n  {opt_err_hint}'
-
-            raise click.UsageError(error_text, ctx=ctx)
 
         if len(given_option_names) > 1:
             error_text = f'The given mutually exclusive options cannot be used at the same time:'
