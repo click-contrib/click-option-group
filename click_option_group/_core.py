@@ -158,19 +158,31 @@ class OptionGroup:
     def get_fake_option(self, ctx: click.Context) -> ty.Optional[GroupedOption]:
         return self._fake_helper_options.get(ctx.command.callback)
 
+    def get_error_hint(self, ctx, option_names: ty.Optional[ty.Set[str]] = None) -> str:
+        options = self.get_options(ctx)
+        text = ''
+
+        for name, opt in reversed(list(options.items())):
+            if option_names and name not in option_names:
+                continue
+            text += f'  {opt.get_error_hint(ctx)}\n'
+
+        if text:
+            text = text[:-1]
+
+        return text
+
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
         if not self.required:
             return
         if option.name in opts:
             return
 
-        options = self.get_options(ctx)
+        option_names = set(self.get_options(ctx))
 
-        if not set(options).intersection(opts):
+        if not option_names.intersection(opts):
             error_text = f'None of the required options are set from "{self.get_default_name(ctx)}" option group:'
-
-            for opt in reversed(list(options.values())):
-                error_text += f'\n  {opt.get_error_hint(ctx)}'
+            error_text += f'\n{self.get_error_hint(ctx)}'
 
             raise click.UsageError(error_text, ctx=ctx)
 
@@ -229,6 +241,29 @@ class OptionGroup:
         self._options.setdefault(func, {})[option.name] = option
 
 
+class RequiredAllOptionGroup(OptionGroup):
+    """Option group with required all options of this group
+    """
+
+    def __init__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None) -> None:
+        super().__init__(name, help, required=True)
+
+    @property
+    def name_extra(self) -> ty.List[str]:
+        return ['required_all']
+
+    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
+        option_names = set(self.get_options(ctx))
+
+        if not option_names.issubset(opts):
+            required_names = option_names.difference(option_names.intersection(opts))
+
+            error_text = f'The following required options from "{self.get_default_name(ctx)}" option group are not set:'
+            error_text += f'\n{self.get_error_hint(ctx, required_names)}'
+
+            raise click.UsageError(error_text, ctx=ctx)
+
+
 class MutuallyExclusiveOptionGroup(OptionGroup):
     """Option group with mutually exclusive behavior for grouped options
     """
@@ -245,9 +280,6 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
 
         if len(given_option_names) > 1:
             error_text = f'The given mutually exclusive options cannot be used at the same time:'
-
-            for opt_name in given_option_names:
-                opt_err_hint = options[opt_name].get_error_hint(ctx)
-                error_text += f'\n  {opt_err_hint}'
+            error_text += f'\n{self.get_error_hint(ctx, given_option_names)}'
 
             raise click.UsageError(error_text, ctx=ctx)
