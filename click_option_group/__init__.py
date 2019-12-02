@@ -10,8 +10,11 @@ from ._core import (
     MutuallyExclusiveOptionGroup
 )
 
+from ._decorators import optgroup
+
 
 __all__ = [
+    'optgroup',
     'GroupedOption',
     'OptionGroup',
     'RequiredAnyOptionGroup',
