@@ -3,6 +3,7 @@
 import typing as ty
 import collections
 import weakref
+import inspect
 
 import click
 from click.core import augment_usage_errors
@@ -65,9 +66,10 @@ class OptionGroup:
     """Option group manages grouped (related) options
     """
 
-    def __init__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None) -> None:
+    def __init__(self, name: ty.Optional[str] = None,
+                 help: ty.Optional[str] = None, **attrs) -> None:
         self._name = name if name else ''
-        self._help = help if help else ''
+        self._help = inspect.cleandoc(help if help else '')
 
         self._options = collections.defaultdict(weakref.WeakValueDictionary)
         self._fake_helper_options = weakref.WeakValueDictionary()
@@ -148,14 +150,11 @@ class OptionGroup:
 
         return decorator
 
-    def get_options(self, ctx: click.Context) -> dict:
+    def get_options(self, ctx: click.Context) -> ty.Dict[str, GroupedOption]:
         return self._options.get(ctx.command.callback, {})
 
     def get_option_names(self, ctx: click.Context) -> ty.List[str]:
         return list(reversed(list(self.get_options(ctx))))
-
-    def get_fake_option(self, ctx: click.Context) -> ty.Optional[GroupedOption]:
-        return self._fake_helper_options.get(ctx.command.callback)
 
     def get_error_hint(self, ctx, option_names: ty.Optional[ty.Set[str]] = None) -> str:
         options = self.get_options(ctx)
