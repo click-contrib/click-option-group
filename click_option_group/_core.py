@@ -55,7 +55,7 @@ class _OptionGroupTitle(click.Option):
 
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
         self.__group = group
-        super().__init__(param_decls, **attrs)
+        super().__init__(param_decls, expose_value=False, **attrs)
 
     def get_help_record(self, ctx: click.Context):
         return self.__group.get_help_record(ctx)
@@ -192,7 +192,7 @@ class OptionGroup:
 
         if callback not in self._fake_helper_options:
             func = click.option(f'{get_fake_option_name()}',
-                                group=self, cls=_OptionGroupTitle, expose_value=False)(func)
+                                group=self, cls=_OptionGroupTitle)(func)
 
             _, params = get_callback_and_params(func)
             self._fake_helper_options[callback] = params[-1]
