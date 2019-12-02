@@ -8,6 +8,8 @@ import weakref
 import click
 from click.core import augment_usage_errors
 
+from ._helpers import get_callback_and_params, raise_mixing_decorators_error
+
 
 _FAKE_OPT_NAME_LEN = 30
 
@@ -167,18 +169,8 @@ class OptionGroup:
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
         pass
 
-    @staticmethod
-    def _get_callback_and_params(func):
-        if isinstance(func, click.Command):
-            params = func.params
-            func = func.callback
-        else:
-            params = getattr(func, '__click_params__', [])
-
-        return func, params
-
     def _check_mixing_decorators(self, func):
-        func, params = self._get_callback_and_params(func)
+        func, params = get_callback_and_params(func)
 
         if not params or func not in self._options:
             return
@@ -188,23 +180,17 @@ class OptionGroup:
         options = self._options[func]
 
         if last_param.name != fake_option.name and last_param.name not in options:
-            hint_list = last_param.opts or [last_param.human_readable_name]
-
-            raise ValueError((
-                "Group's options must not be mixed with "
-                "other options while adding by decorator. "
-                f"Check decorator position for {hint_list} option."
-            ))
+            raise_mixing_decorators_error(last_param)
 
     def _add_fake_helper_option(self, func):
-        callback, params = self._get_callback_and_params(func)
+        callback, params = get_callback_and_params(func)
 
         if callback not in self._fake_helper_options:
             fake_opt_name = ''.join(random.choices(string.ascii_lowercase, k=_FAKE_OPT_NAME_LEN))
             func = click.option(f'--{fake_opt_name}',
                                 group=self, cls=GroupedOption, expose_value=False)(func)
 
-            _, params = self._get_callback_and_params(func)
+            _, params = get_callback_and_params(func)
             self._fake_helper_options[callback] = params[-1]
 
         fake_option = self._fake_helper_options[callback]
@@ -216,9 +202,8 @@ class OptionGroup:
             params[-1], params[fake_index] = params[fake_index], params[-1]
 
     def _option_memo(self, func):
-        func, params = self._get_callback_and_params(func)
-
-        option: GroupedOption = params[-1]
+        func, params = get_callback_and_params(func)
+        option = params[-1]
         self._options.setdefault(func, {})[option.name] = option
 
 
