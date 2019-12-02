@@ -2,8 +2,13 @@
 
 import typing as ty
 import collections.abc as abc
+import random
+import string
 
 import click
+
+
+FAKE_OPT_NAME_LEN = 30
 
 
 def get_callback_and_params(func) -> ty.Tuple[abc.Callable, ty.List[click.Option]]:
@@ -19,6 +24,10 @@ def get_callback_and_params(func) -> ty.Tuple[abc.Callable, ty.List[click.Option
         params = getattr(func, '__click_params__', [])
 
     return func, params
+
+
+def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN):
+    return '--' + ''.join(random.choices(string.ascii_lowercase, k=name_len))
 
 
 def raise_mixing_decorators_error(wrong_option: click.Option):

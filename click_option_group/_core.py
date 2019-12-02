@@ -2,17 +2,16 @@
 
 import typing as ty
 import collections
-import random
-import string
 import weakref
 
 import click
 from click.core import augment_usage_errors
 
-from ._helpers import get_callback_and_params, raise_mixing_decorators_error
-
-
-_FAKE_OPT_NAME_LEN = 30
+from ._helpers import (
+    get_callback_and_params,
+    get_fake_option_name,
+    raise_mixing_decorators_error,
+)
 
 
 class GroupedOption(click.Option):
@@ -50,7 +49,10 @@ class GroupedOption(click.Option):
             return f'{indent}{opts}', opt_help
 
 
-class _OptionGroupHelpRecord(click.Option):
+class _OptionGroupTitle(click.Option):
+    """The helper class to display option group title in --help
+    """
+
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
         self.__group = group
         super().__init__(param_decls, **attrs)
@@ -189,9 +191,8 @@ class OptionGroup:
         callback, params = get_callback_and_params(func)
 
         if callback not in self._fake_helper_options:
-            fake_opt_name = ''.join(random.choices(string.ascii_lowercase, k=_FAKE_OPT_NAME_LEN))
-            func = click.option(f'--{fake_opt_name}',
-                                group=self, cls=_OptionGroupHelpRecord, expose_value=False)(func)
+            func = click.option(f'{get_fake_option_name()}',
+                                group=self, cls=_OptionGroupTitle, expose_value=False)(func)
 
             _, params = get_callback_and_params(func)
             self._fake_helper_options[callback] = params[-1]
