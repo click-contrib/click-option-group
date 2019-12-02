@@ -25,7 +25,7 @@ setup(
     packages=find_packages(exclude='tests'),
     python_requires='>=3.6,<4',
     install_requires=[
-        'Click>=7.0',
+        'Click>=7.0,<8',
     ],
     url='https://github.com/espdev/click-option-group',
     license='BSD-3-Clause',
