@@ -18,7 +18,7 @@ from ._helpers import (
 class OptionStackItem(ty.NamedTuple):
     param_decls: ty.Tuple[str, ...]
     attrs: ty.Dict[str, ty.Any]
-    param_count: int
+    params: ty.List[click.Option]
 
 
 class _NotAttachedOption(click.Option):
@@ -42,9 +42,9 @@ class _NotAttachedOption(click.Option):
         options_error_hint = options_error_hint[:-1]
 
         raise click.ClickException((
-            f"The following grouped options were not attached to some option group:\n"
+            f"Missing option group decorator in '{ctx.command.name}' for the following options:\n"
             f"{options_error_hint}\n"
-            "Add @optgroup.group('Group name') decorator above to create a group."))
+            "Add @optgroup.group('Group name') decorator above these options to create a group."))
 
 
 class _OptGroup:
@@ -133,8 +133,8 @@ class _OptGroup:
             option_stack = self._decorating_state[callback]
 
             self._check_mixing_decorators(option_stack, params)
-            # self._add_not_attached_option(func, param_decls)
-            option_stack.append(OptionStackItem(param_decls, attrs, len(params)))
+            self._add_not_attached_option(func, param_decls)
+            option_stack.append(OptionStackItem(param_decls, attrs, params.copy()))
 
             return func
 
@@ -151,9 +151,19 @@ class _OptGroup:
 
     @staticmethod
     def _check_mixing_decorators(options_stack, params):
+        def remove_attached_options(options):
+            for option in options.copy():
+                if isinstance(option, _NotAttachedOption):
+                    options.remove(option)
+            return options
+
         if options_stack:
             last_state = options_stack[-1]
-            if len(params) > last_state.param_count:
+
+            params = remove_attached_options(params.copy())
+            last_params = remove_attached_options(last_state.params.copy())
+
+            if len(params) > len(last_params):
                 raise_mixing_decorators_error(params[-1])
 
 
