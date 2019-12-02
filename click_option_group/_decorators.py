@@ -133,7 +133,7 @@ class _OptGroup:
             option_stack = self._decorating_state[callback]
 
             self._check_mixing_decorators(option_stack, params)
-            self._add_not_attached_option(func, param_decls)
+            # self._add_not_attached_option(func, param_decls)
             option_stack.append(OptionStackItem(param_decls, attrs, len(params)))
 
             return func
