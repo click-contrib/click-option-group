@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import typing as ty
+import collections
 import random
 import string
 import weakref
@@ -24,7 +25,7 @@ class GroupedOption(click.Option):
                 raise TypeError(
                     f"'{attr}' attribute is not allowed for '{type(group).__name__}' options.")
 
-        self.__group = weakref.ref(group)
+        self.__group = group
         super().__init__(param_decls, **attrs)
 
     @property
@@ -33,7 +34,7 @@ class GroupedOption(click.Option):
 
         :return: [OptionGroup] the group for this option
         """
-        return self.__group()
+        return self.__group
 
     def handle_parse_result(self, ctx, opts, args):
         with augment_usage_errors(ctx, param=self):
@@ -43,17 +44,19 @@ class GroupedOption(click.Option):
     def get_help_record(self, ctx: click.Context):
         opts, opt_help = super().get_help_record(ctx)
 
-        fake_option = self.group.get_fake_option(ctx)
-        if not fake_option:
-            return opts, opt_help
+        formatter = ctx.make_formatter()
+        with formatter.indentation():
+            indent = ' ' * formatter.current_indent
+            return f'{indent}{opts}', opt_help
 
-        if self.name == fake_option.name:
-            return self.group.get_help_record(ctx)
-        else:
-            formatter = ctx.make_formatter()
-            with formatter.indentation():
-                indent = ' ' * formatter.current_indent
-                return f'{indent}{opts}', opt_help
+
+class _OptionGroupHelpRecord(click.Option):
+    def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
+        self.__group = group
+        super().__init__(param_decls, **attrs)
+
+    def get_help_record(self, ctx: click.Context):
+        return self.__group.get_help_record(ctx)
 
 
 class OptionGroup:
@@ -64,8 +67,8 @@ class OptionGroup:
         self._name = name if name else ''
         self._help = help if help else ''
 
-        self._options = {}
-        self._fake_helper_options = {}
+        self._options = collections.defaultdict(weakref.WeakValueDictionary)
+        self._fake_helper_options = weakref.WeakValueDictionary()
 
     @property
     def name(self) -> str:
@@ -188,7 +191,7 @@ class OptionGroup:
         if callback not in self._fake_helper_options:
             fake_opt_name = ''.join(random.choices(string.ascii_lowercase, k=_FAKE_OPT_NAME_LEN))
             func = click.option(f'--{fake_opt_name}',
-                                group=self, cls=GroupedOption, expose_value=False)(func)
+                                group=self, cls=_OptionGroupHelpRecord, expose_value=False)(func)
 
             _, params = get_callback_and_params(func)
             self._fake_helper_options[callback] = params[-1]
@@ -204,7 +207,7 @@ class OptionGroup:
     def _option_memo(self, func):
         func, params = get_callback_and_params(func)
         option = params[-1]
-        self._options.setdefault(func, {})[option.name] = option
+        self._options[func][option.name] = option
 
 
 class RequiredAnyOptionGroup(OptionGroup):
