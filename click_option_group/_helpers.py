@@ -31,9 +31,13 @@ def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN):
 
 
 def raise_mixing_decorators_error(wrong_option: click.Option):
-    hint_list = wrong_option.opts or [wrong_option.name]
+    ctx = click.get_current_context(silent=True)
+    if ctx:
+        error_hint = wrong_option.get_error_hint(ctx)
+    else:
+        error_hint = wrong_option.opts or [wrong_option.name]
 
-    raise ValueError((
+    raise click.ClickException((
         "Group's options must not be mixed with other options while adding by decorator. "
-        f"Check decorator position for {hint_list} option."
+        f"Check decorator position for {error_hint} option."
     ))
