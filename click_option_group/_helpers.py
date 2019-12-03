@@ -26,18 +26,18 @@ def get_callback_and_params(func) -> ty.Tuple[abc.Callable, ty.List[click.Option
     return func, params
 
 
-def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN):
-    return '--' + ''.join(random.choices(string.ascii_lowercase, k=name_len))
+def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN, prefix: str = 'fake'):
+    return f'--{prefix}-' + ''.join(random.choices(string.ascii_lowercase, k=name_len))
 
 
-def raise_mixing_decorators_error(wrong_option: click.Option):
+def raise_mixing_decorators_error(wrong_option: click.Option, callback: abc.Callable):
     ctx = click.get_current_context(silent=True)
     if ctx:
         error_hint = wrong_option.get_error_hint(ctx)
     else:
         error_hint = wrong_option.opts or [wrong_option.name]
 
-    raise click.ClickException((
-        "Group's options must not be mixed with other options while adding by decorator. "
-        f"Check decorator position for {error_hint} option."
+    raise TypeError((
+        "Grouped options must not be mixed with regular parameters while adding by decorator. "
+        f"Check decorator position for {error_hint} option in '{callback.__name__}'."
     ))

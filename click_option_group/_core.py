@@ -50,8 +50,8 @@ class GroupedOption(click.Option):
             return f'{indent}{opts}', opt_help
 
 
-class _OptionGroupTitle(click.Option):
-    """The helper class to display option group title in --help
+class _GroupTitleFakeOption(click.Option):
+    """The helper `Option` class to display option group title in --help
     """
 
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
@@ -72,7 +72,7 @@ class OptionGroup:
         self._help = inspect.cleandoc(help if help else '')
 
         self._options = collections.defaultdict(weakref.WeakValueDictionary)
-        self._fake_helper_options = weakref.WeakValueDictionary()
+        self._group_title_options = weakref.WeakValueDictionary()
 
     @property
     def name(self) -> str:
@@ -143,8 +143,8 @@ class OptionGroup:
             func = click.option(*param_decls, group=self, **option_attrs)(func)
             self._option_memo(func)
 
-            # Add the fake invisible option to use for print nice help for grouped options
-            self._add_fake_helper_option(func)
+            # Add the fake invisible option to use for print nice title help for grouped options
+            self._add_title_fake_option(func)
 
             return func
 
@@ -180,29 +180,29 @@ class OptionGroup:
             return
 
         last_param = params[-1]
-        fake_option = self._fake_helper_options[func]
+        title_option = self._group_title_options[func]
         options = self._options[func]
 
-        if last_param.name != fake_option.name and last_param.name not in options:
-            raise_mixing_decorators_error(last_param)
+        if last_param.name != title_option.name and last_param.name not in options:
+            raise_mixing_decorators_error(last_param, func)
 
-    def _add_fake_helper_option(self, func):
+    def _add_title_fake_option(self, func):
         callback, params = get_callback_and_params(func)
 
-        if callback not in self._fake_helper_options:
-            func = click.option(f'{get_fake_option_name()}',
-                                group=self, cls=_OptionGroupTitle)(func)
+        if callback not in self._group_title_options:
+            func = click.option(get_fake_option_name(),
+                                group=self, cls=_GroupTitleFakeOption)(func)
 
             _, params = get_callback_and_params(func)
-            self._fake_helper_options[callback] = params[-1]
+            self._group_title_options[callback] = params[-1]
 
-        fake_option = self._fake_helper_options[callback]
+        title_option = self._group_title_options[callback]
         last_option = params[-1]
 
-        if fake_option.name != last_option.name:
-            # Hold fake option on the top of the option group
-            fake_index = params.index(fake_option)
-            params[-1], params[fake_index] = params[fake_index], params[-1]
+        if title_option.name != last_option.name:
+            # Hold title fake option on the top of the option group
+            title_index = params.index(title_option)
+            params[-1], params[title_index] = params[title_index], params[-1]
 
     def _option_memo(self, func):
         func, params = get_callback_and_params(func)

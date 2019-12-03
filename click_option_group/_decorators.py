@@ -22,11 +22,16 @@ class OptionStackItem(ty.NamedTuple):
 
 
 class _NotAttachedOption(click.Option):
+    """The helper class to catch grouped options which were not attached to the group
 
-    def __init__(self, param_decls=None, *, option_decls, all_options, **attrs):
-        super().__init__(param_decls, expose_value=False, **attrs)
+    Raises TypeError if not attached options exist.
+
+    """
+
+    def __init__(self, param_decls=None, *, option_decls, all_not_attached_options, **attrs):
+        super().__init__(param_decls, expose_value=False, hidden=False, **attrs)
         self.option_decls = option_decls
-        self._all_options = all_options
+        self._all_not_attached_options = all_not_attached_options
 
     def handle_parse_result(self, ctx, opts, args):
         self._raise_error(ctx)
@@ -36,15 +41,14 @@ class _NotAttachedOption(click.Option):
 
     def _raise_error(self, ctx):
         options_error_hint = ''
-        for option in reversed(self._all_options[ctx.command.callback]):
+        for option in reversed(self._all_not_attached_options[ctx.command.callback]):
             decls = option.option_decls
             options_error_hint += f'  {click.Option(decls).get_error_hint(ctx)}\n'
         options_error_hint = options_error_hint[:-1]
 
-        raise click.ClickException((
-            f"Missing option group decorator in '{ctx.command.name}' for the following options:\n"
-            f"{options_error_hint}\n"
-            "Add @optgroup.group('Group name') decorator above these options to create a group."))
+        raise TypeError((
+            f"Missing option group decorator in '{ctx.command.name}' command for the following grouped options:\n"
+            f"{options_error_hint}\n"))
 
 
 class _OptGroup:
@@ -78,6 +82,9 @@ class _OptGroup:
               cls: ty.Optional[ty.Type[OptionGroup]] = None, **attrs):
         """The decorator creates a new group and collects its options
 
+        Creates the option group and registers all grouped options
+        which were added by `option` decorator.
+
         :param name: Group name or None for deault name
         :param help: Group help or None for empty help
         :param cls: Option group class that should be inherited from `OptionGroup` class
@@ -103,8 +110,8 @@ class _OptGroup:
 
             option_stack = self._decorating_state.pop(callback)
 
-            self._check_mixing_decorators(option_stack, self._filter_not_attached(params))
             [params.remove(opt) for opt in self._not_attached_options.pop(callback)]
+            self._check_mixing_decorators(callback, option_stack, self._filter_not_attached(params))
 
             option_group = cls(name, help, **attrs)
 
@@ -118,8 +125,8 @@ class _OptGroup:
     def option(self, *param_decls, **attrs):
         """The decorator adds a new option to the group
 
-        The decorator is lazy. It registers option decls and attrs.
-        All options will be added in group decorator.
+        The decorator is lazy. It adds option decls and attrs.
+        All options will be registered by `group` decorator.
 
         :param param_decls: option declaration tuple
         :param attrs: additional option attributes and parameters
@@ -132,7 +139,7 @@ class _OptGroup:
             option_stack = self._decorating_state[callback]
             params = self._filter_not_attached(params)
 
-            self._check_mixing_decorators(option_stack, params)
+            self._check_mixing_decorators(callback, option_stack, params)
             self._add_not_attached_option(func, param_decls)
             option_stack.append(OptionStackItem(param_decls, attrs, len(params)))
 
@@ -141,10 +148,12 @@ class _OptGroup:
         return decorator
 
     def _add_not_attached_option(self, func, param_decls):
-        click.option(f'{get_fake_option_name()}',
-                     option_decls=param_decls,
-                     all_options=self._not_attached_options,
-                     cls=_NotAttachedOption)(func)
+        click.option(
+            get_fake_option_name(),
+            option_decls=param_decls,
+            all_not_attached_options=self._not_attached_options,
+            cls=_NotAttachedOption
+        )(func)
 
         callback, params = get_callback_and_params(func)
         self._not_attached_options[callback].append(params[-1])
@@ -154,12 +163,12 @@ class _OptGroup:
         return [opt for opt in options if not isinstance(opt, _NotAttachedOption)]
 
     @staticmethod
-    def _check_mixing_decorators(options_stack, params):
+    def _check_mixing_decorators(callback, options_stack, params):
         if options_stack:
             last_state = options_stack[-1]
 
             if len(params) > last_state.param_count:
-                raise_mixing_decorators_error(params[-1])
+                raise_mixing_decorators_error(params[-1], callback)
 
 
 optgroup = _OptGroup()
