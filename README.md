@@ -1,8 +1,26 @@
 # click-option-group
 
-Option groups missing in Click
+Option groups missing in [Click](https://github.com/pallets/click/)
 
 ## The aim and motivation
+
+Click is a package for creating powerful and beautiful command line interfaces (CLI) in Python, 
+but it has no functionality for creating option groups.
+
+Option groups are convenient mechanism for logical structuring CLI, also it allows you to set 
+specific behavior and set the relation between options (Mutually exclusive options for example). 
+Moreover, [argparse](https://docs.python.org/3/library/argparse.html) stdlib package contains this 
+functionality out of the box.
+
+At the same time, I see a need for this functionality among users of Click.
+You can read interesting discussions about it in the following issues:
+
+* https://github.com/pallets/click/issues/257
+* https://github.com/pallets/click/issues/509
+* https://github.com/pallets/click/issues/1137
+
+The aim of this package is to provide group options extensible functionality 
+using canonical and clean API (Click-like API as far as possible).
 
 ## Quickstart
 
