@@ -24,7 +24,7 @@ from click_option_group import optgroup, MutuallyExclusiveOptionGroup
 @optgroup.option('--timeout', type=int, default=30, help='The server response timeout')
 @optgroup.group('Input data sources', cls=MutuallyExclusiveOptionGroup, required=True, 
                 help='The sources of the input data')
-@optgroup.option('--tsv-file', type=click.File(), help='CVS/TSV input data file')
+@optgroup.option('--tsv-file', type=click.File(), help='CSV/TSV input data file')
 @optgroup.option('--json-file', type=click.File(), help='JSON input data file')
 @click.option('--debug/--no-debug', default=False, help='Debug flag')
 def cli(**params):
