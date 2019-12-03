@@ -116,7 +116,11 @@ class _OptGroup:
 
             attrs['help'] = help
 
-            option_group = cls(name, **attrs)
+            try:
+                option_group = cls(name, **attrs)
+            except TypeError as err:
+                message = str(err).replace('__init__()', f"'{cls.__name__}' constructor")
+                raise TypeError(message) from err
 
             for item in option_stack:
                 func = option_group.option(*item.param_decls, **item.attrs)(func)
