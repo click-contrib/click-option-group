@@ -229,7 +229,7 @@ class RequiredAnyOptionGroup(OptionGroup):
         option_names = set(self.get_options(ctx))
 
         if not option_names.intersection(opts):
-            error_text = f'None of the required options are set from "{self.get_default_name(ctx)}" option group:'
+            error_text = f'Missing one of the required options from "{self.get_default_name(ctx)}" option group:'
             error_text += f'\n{self.get_error_hint(ctx)}'
 
             raise click.UsageError(error_text, ctx=ctx)
@@ -253,7 +253,7 @@ class RequiredAllOptionGroup(OptionGroup):
         if not option_names.issubset(opts):
             required_names = option_names.difference(option_names.intersection(opts))
 
-            error_text = f'The following required options from "{self.get_default_name(ctx)}" option group are not set:'
+            error_text = f'Missing all required options from "{self.get_default_name(ctx)}" option group:'
             error_text += f'\n{self.get_error_hint(ctx, required_names)}'
 
             raise click.UsageError(error_text, ctx=ctx)
@@ -298,7 +298,7 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
             raise click.UsageError(error_text, ctx=ctx)
 
         elif self.required and given_option_count == 0:
-            error_text = ('None of the required mutually exclusive options are set from '
+            error_text = ('Missing one of the required mutually exclusive options from '
                           f'"{self.get_default_name(ctx)}" option group:')
             error_text += f'\n{self.get_error_hint(ctx)}'
             raise click.UsageError(error_text, ctx=ctx)
