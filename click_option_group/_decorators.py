@@ -172,5 +172,5 @@ class _OptGroup:
 
 
 optgroup = _OptGroup()
-"""Decorator creates groups of options and adds options into groups
+"""Provides decorators for creating option groups and adding grouped options
 """
