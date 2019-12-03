@@ -46,7 +46,7 @@ Options:
     --timeout INTEGER             The server response timeout
   Input data sources: [mutually_exclusive, required]
                                   The sources of the input data
-    --tsv-file FILENAME           CVS/TSV input data file
+    --tsv-file FILENAME           CSV/TSV input data file
     --json-file FILENAME          JSON input data file
   --debug / --no-debug            Debug flag
   --help                          Show this message and exit.
