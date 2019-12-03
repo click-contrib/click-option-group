@@ -18,7 +18,7 @@ from ._helpers import (
 class OptionStackItem(ty.NamedTuple):
     param_decls: ty.Tuple[str, ...]
     attrs: ty.Dict[str, ty.Any]
-    params: ty.List[click.Option]
+    param_count: int
 
 
 class _NotAttachedOption(click.Option):
@@ -97,24 +97,19 @@ class _OptGroup:
             if callback not in self._decorating_state:
                 with_name = f' "{name}"' if name else ''
                 warnings.warn(
-                    f'There is attempt to add an empty option group{with_name}. The group will not be added.',
+                    f'The empty option group{with_name} was found. The group will not be added.',
                     UserWarning)
                 return func
 
-            option_stack = self._decorating_state[callback]
-            self._check_mixing_decorators(option_stack, params)
+            option_stack = self._decorating_state.pop(callback)
+
+            self._check_mixing_decorators(option_stack, self._filter_not_attached(params))
+            [params.remove(opt) for opt in self._not_attached_options.pop(callback)]
 
             option_group = cls(name, help, **attrs)
 
             for item in option_stack:
                 func = option_group.option(*item.param_decls, **item.attrs)(func)
-
-            del option_stack
-            del self._decorating_state[callback]
-
-            for opt in self._not_attached_options[callback]:
-                params.remove(opt)
-            del self._not_attached_options[callback]
 
             return func
 
@@ -123,6 +118,9 @@ class _OptGroup:
     def option(self, *param_decls, **attrs):
         """The decorator adds a new option to the group
 
+        The decorator is lazy. It registers option decls and attrs.
+        All options will be added in group decorator.
+
         :param param_decls: option declaration tuple
         :param attrs: additional option attributes and parameters
 
@@ -130,11 +128,13 @@ class _OptGroup:
 
         def decorator(func):
             callback, params = get_callback_and_params(func)
+
             option_stack = self._decorating_state[callback]
+            params = self._filter_not_attached(params)
 
             self._check_mixing_decorators(option_stack, params)
             self._add_not_attached_option(func, param_decls)
-            option_stack.append(OptionStackItem(param_decls, attrs, params.copy()))
+            option_stack.append(OptionStackItem(param_decls, attrs, len(params)))
 
             return func
 
@@ -150,20 +150,15 @@ class _OptGroup:
         self._not_attached_options[callback].append(params[-1])
 
     @staticmethod
-    def _check_mixing_decorators(options_stack, params):
-        def remove_attached_options(options):
-            for option in options.copy():
-                if isinstance(option, _NotAttachedOption):
-                    options.remove(option)
-            return options
+    def _filter_not_attached(options):
+        return [opt for opt in options if not isinstance(opt, _NotAttachedOption)]
 
+    @staticmethod
+    def _check_mixing_decorators(options_stack, params):
         if options_stack:
             last_state = options_stack[-1]
 
-            params = remove_attached_options(params.copy())
-            last_params = remove_attached_options(last_state.params.copy())
-
-            if len(params) > len(last_params):
+            if len(params) > last_state.param_count:
                 raise_mixing_decorators_error(params[-1])
 
 
