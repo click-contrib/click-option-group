@@ -8,11 +8,11 @@ Click is a package for creating powerful and beautiful command line interfaces (
 but it has no functionality for creating option groups.
 
 Option groups are convenient mechanism for logical structuring CLI, also it allows you to set 
-specific behavior and set the relation between options (Mutually exclusive options for example). 
+specific behavior and set the relation between options (mutually exclusive options for example). 
 Moreover, [argparse](https://docs.python.org/3/library/argparse.html) stdlib package contains this 
 functionality out of the box.
 
-At the same time, I see a need for this functionality among users of Click.
+At the same time, many Click users need this functionality.
 You can read interesting discussions about it in the following issues:
 
 * https://github.com/pallets/click/issues/257
