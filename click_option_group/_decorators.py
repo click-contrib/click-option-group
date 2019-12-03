@@ -76,18 +76,19 @@ class _OptGroup:
 
     def __call__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None,
                  cls: ty.Optional[ty.Type[OptionGroup]] = None, **attrs):
-        return self.group(name, help, cls, **attrs)
+        return self.group(name, cls=cls, help=help, **attrs)
 
-    def group(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None,
-              cls: ty.Optional[ty.Type[OptionGroup]] = None, **attrs):
+    def group(self, name: ty.Optional[str] = None, *,
+              cls: ty.Optional[ty.Type[OptionGroup]] = None,
+              help: ty.Optional[str] = None, **attrs):
         """The decorator creates a new group and collects its options
 
         Creates the option group and registers all grouped options
         which were added by `option` decorator.
 
         :param name: Group name or None for deault name
-        :param help: Group help or None for empty help
         :param cls: Option group class that should be inherited from `OptionGroup` class
+        :param help: Group help or None for empty help
         :param attrs: Additional parameters of option group class
 
         """
@@ -113,7 +114,9 @@ class _OptGroup:
             [params.remove(opt) for opt in self._not_attached_options.pop(callback)]
             self._check_mixing_decorators(callback, option_stack, self._filter_not_attached(params))
 
-            option_group = cls(name, help, **attrs)
+            attrs['help'] = help
+
+            option_group = cls(name, **attrs)
 
             for item in option_stack:
                 func = option_group.option(*item.param_decls, **item.attrs)(func)

@@ -66,8 +66,8 @@ class OptionGroup:
     """Option group manages grouped (related) options
     """
 
-    def __init__(self, name: ty.Optional[str] = None,
-                 help: ty.Optional[str] = None, **attrs) -> None:
+    def __init__(self, name: ty.Optional[str] = None, *,
+                 help: ty.Optional[str] = None) -> None:
         self._name = name if name else ''
         self._help = inspect.cleandoc(help if help else '')
 
@@ -263,9 +263,10 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
     """Option group with mutually exclusive behavior for grouped options
     """
 
-    def __init__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None, *,
+    def __init__(self, name: ty.Optional[str] = None, *,
+                 help: ty.Optional[str] = None,
                  required: bool = False) -> None:
-        super().__init__(name, help)
+        super().__init__(name, help=help)
         self._required = required
 
     @property
