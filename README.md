@@ -1,6 +1,7 @@
 # click-option-group
 
-Option groups missing in [Click](https://github.com/pallets/click/)
+**click-option-group** is a Click-extension package that adds option groups 
+missing in [Click](https://github.com/pallets/click/).
 
 ## The aim and motivation
 
