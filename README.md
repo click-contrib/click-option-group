@@ -16,9 +16,9 @@ functionality out of the box.
 At the same time, many Click users need this functionality.
 You can read interesting discussions about it in the following issues:
 
-* https://github.com/pallets/click/issues/257
-* https://github.com/pallets/click/issues/509
-* https://github.com/pallets/click/issues/1137
+* [issue 257](https://github.com/pallets/click/issues/257)
+* [issue 509](https://github.com/pallets/click/issues/509)
+* [issue 1137](https://github.com/pallets/click/issues/1137)
 
 The aim of this package is to provide group options extensible functionality 
 using canonical and clean API (Click-like API as far as possible).
