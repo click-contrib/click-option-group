@@ -25,7 +25,6 @@ class _NotAttachedOption(click.Option):
     """The helper class to catch grouped options which were not attached to the group
 
     Raises TypeError if not attached options exist.
-
     """
 
     def __init__(self, param_decls=None, *, option_decls, all_not_attached_options, **attrs):
@@ -67,7 +66,6 @@ class _OptGroup:
         @optgroup.group('Group 2', help='option group 2')
         @optgroup.option('--spam')
         ...
-
     """
 
     def __init__(self) -> None:
@@ -90,7 +88,6 @@ class _OptGroup:
         :param cls: Option group class that should be inherited from `OptionGroup` class
         :param help: Group help or None for empty help
         :param attrs: Additional parameters of option group class
-
         """
 
         if not cls:
@@ -137,7 +134,6 @@ class _OptGroup:
 
         :param param_decls: option declaration tuple
         :param attrs: additional option attributes and parameters
-
         """
 
         def decorator(func):
@@ -180,4 +176,16 @@ class _OptGroup:
 
 optgroup = _OptGroup()
 """Provides decorators for creating option groups and adding grouped options
+
+Decorators:
+    - `group` is used for creating an option group
+    - `option` is used for adding options to a group
+
+Example::
+
+    @optgroup.group('Group 1', help='option group 1')
+    @optgroup.option('--foo')
+    @optgroup.option('--bar')
+    @optgroup.group('Group 2', help='option group 2')
+    @optgroup.option('--spam')
 """

@@ -17,6 +17,12 @@ from ._helpers import (
 
 class GroupedOption(click.Option):
     """Represents grouped (related) optional values
+
+    The class should be used only with `OptionGroup` class for creating grouped options.
+
+    :param param_decls: option declaration tuple
+    :param group: `OptionGroup` instance (the group for this option)
+    :param attrs: additional option attributes
     """
 
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
@@ -30,9 +36,9 @@ class GroupedOption(click.Option):
 
     @property
     def group(self) -> 'OptionGroup':
-        """Returns the group for this option
+        """Returns the reference to the group for this option
 
-        :return: [OptionGroup] the group for this option
+        :return: `OptionGroup` the group instance for this option
         """
         return self.__group
 
@@ -51,7 +57,7 @@ class GroupedOption(click.Option):
 
 
 class _GroupTitleFakeOption(click.Option):
-    """The helper `Option` class to display option group title in --help
+    """The helper `Option` class to display option group title in help
     """
 
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
@@ -64,6 +70,12 @@ class _GroupTitleFakeOption(click.Option):
 
 class OptionGroup:
     """Option group manages grouped (related) options
+
+    The class is used for creating the groups of options. The class can de used as based class to implement
+    specific behavior for grouped options.
+
+    :param name: the group name. If it is not set the default group name will be used
+    :param help: the group help text or None
     """
 
     def __init__(self, name: ty.Optional[str] = None, *,
@@ -92,10 +104,14 @@ class OptionGroup:
 
     @property
     def name_extra(self) -> ty.List[str]:
+        """Returns extra name attributes for the group
+        """
         return []
 
     @property
     def forbidden_option_attrs(self) -> ty.List[str]:
+        """Returns the list of forbidden option attributes for the group
+        """
         return []
 
     def get_default_name(self, ctx: click.Context) -> str:
@@ -114,7 +130,7 @@ class OptionGroup:
         """Returns the help record for the group
 
         :param ctx: Click Context object
-        :return: the tuple of two fileds: (name, help)
+        :return: the tuple of two fileds: `(name, help)`
         """
 
         name = self.get_default_name(ctx)
@@ -130,6 +146,8 @@ class OptionGroup:
 
     def option(self, *param_decls, **attrs):
         """Decorator attaches an grouped option to the command
+
+        The decorator is used for adding options to the group and to the Click-command
         """
 
         def decorator(func):
@@ -151,9 +169,13 @@ class OptionGroup:
         return decorator
 
     def get_options(self, ctx: click.Context) -> ty.Dict[str, GroupedOption]:
+        """Returns the dictionary with group options
+        """
         return self._options.get(ctx.command.callback, {})
 
     def get_option_names(self, ctx: click.Context) -> ty.List[str]:
+        """Returns the list with option names ordered by addition in the group
+        """
         return list(reversed(list(self.get_options(ctx))))
 
     def get_error_hint(self, ctx, option_names: ty.Optional[ty.Set[str]] = None) -> str:
@@ -171,7 +193,8 @@ class OptionGroup:
         return text
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
-        pass
+        """The method should be used for adding specific behavior and relation for options in the group
+        """
 
     def _check_mixing_decorators(self, func):
         func, params = get_callback_and_params(func)
@@ -212,6 +235,8 @@ class OptionGroup:
 
 class RequiredAnyOptionGroup(OptionGroup):
     """Option group with required any options of this group
+
+    `RequiredAnyOptionGroup` defines the behavior: At least one option from the group must be set.
     """
 
     @property
@@ -237,6 +262,8 @@ class RequiredAnyOptionGroup(OptionGroup):
 
 class RequiredAllOptionGroup(OptionGroup):
     """Option group with required all options of this group
+
+    `RequiredAllOptionGroup` defines the behavior: All options from the group must be set.
     """
 
     @property
@@ -261,6 +288,12 @@ class RequiredAllOptionGroup(OptionGroup):
 
 class MutuallyExclusiveOptionGroup(OptionGroup):
     """Option group with mutually exclusive behavior for grouped options
+
+    `MutuallyExclusiveOptionGroup` defines the behavior:
+        - Only one option from the group must be set if `required` is True
+        - Only one or none option from the group must be set if `required` is False
+
+    :param required: If this flag is `True` one option from the group must be set
     """
 
     def __init__(self, name: ty.Optional[str] = None, *,
