@@ -1,8 +1,8 @@
 # click-option-group
 
-[![PyPI version](https://img.shields.io/pypi/v/click_option_group.svg)](https://pypi.python.org/pypi/click_option_group)
-[![Build status](https://travis-ci.org/espdev/click_option_group.svg?branch=master)](https://travis-ci.org/espdev/click_option_group)
-![Supported Python versions](https://img.shields.io/pypi/pyversions/click_option_group.svg)
+[![PyPI version](https://img.shields.io/pypi/v/click-option-group.svg)](https://pypi.python.org/pypi/click-option-group)
+[![Build status](https://travis-ci.org/espdev/click-option-group.svg?branch=master)](https://travis-ci.org/espdev/click-option-group)
+![Supported Python versions](https://img.shields.io/pypi/pyversions/click-option-group.svg)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
