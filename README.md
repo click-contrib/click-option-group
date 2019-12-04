@@ -130,7 +130,7 @@ The correct code looks like:
 
 click-option-group checks the decorators order and raises the exception if `optgroup.option` and `click.option` are mixed.
 
-Also if we will be use `optgroup.option` without `optgroup.grpup()`/`optgroup()` it also raises exception.
+Also if we will use `optgroup.option` without `optgroup.grpup()`/`optgroup()` it also raises exception.
 
 An incorrect code example:
 ```python
