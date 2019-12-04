@@ -31,7 +31,18 @@ using canonical and clean API (Click-like API as far as possible).
 
 ## Quickstart
 
-The example of usage:
+## Installing 
+
+Install and update using pip:
+
+```bash
+$ pip install click-option-group
+```
+
+## A Simple Example
+
+Here is a simple example how to use option groups in your Click-based CLI.
+Just use `optgroup` for decorating your cli-function in Click-like API style.
 
 ```python
 # app.py
@@ -76,3 +87,45 @@ Options:
   --debug / --no-debug            Debug flag
   --help                          Show this message and exit.
 ```
+
+# How it works
+
+Firstly, we define the group:
+```python
+@optgroup.group('Server configuration', help='The configuration of some server connection')
+```
+
+Also we can define groups just using `optgroup()`:
+```python
+@optgroup('Server configuration', help='The configuration of some server connection')
+```
+
+Secondly, we add the options to the group:
+```python
+@optgroup.option('-h', '--host', default='localhost', help='Server host name')
+@optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
+```
+
+The important point: do not mix `optgroup.option` and `click.option` decorators!
+
+Here is an incorrect code:
+```python
+@optgroup.group('Server configuration', 
+                help='The configuration of some server connection')
+@click.option('--foo')  # ERROR
+@optgroup.option('-h', '--host', default='localhost', help='Server host name')
+@click.option('--bar')  # ERROR
+@optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
+```
+
+The correct code:
+```python
+@click.option('--foo')
+@optgroup.group('Server configuration', 
+                help='The configuration of some server connection')
+@optgroup.option('-h', '--host', default='localhost', help='Server host name')
+@optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
+@click.option('--bar')
+```
+
+click-option-group checks the decorators order and raises the exception if `optgroup.option` and `click.option` are mixed.
