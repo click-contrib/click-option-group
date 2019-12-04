@@ -9,13 +9,13 @@
 **click-option-group** is a Click-extension package that adds option groups 
 missing in [Click](https://github.com/pallets/click/).
 
-## The aim and motivation
+## Aim and Motivation
 
 Click is a package for creating powerful and beautiful command line interfaces (CLI) in Python, 
-but it has no functionality for creating option groups.
+but it has no the functionality for creating option groups.
 
 Option groups are convenient mechanism for logical structuring CLI, also it allows you to set 
-specific behavior and set the relation between options (mutually exclusive options for example). 
+the specific behavior and set the relationship among grouped options (mutually exclusive options for example). 
 Moreover, [argparse](https://docs.python.org/3/library/argparse.html) stdlib package contains this 
 functionality out of the box.
 
@@ -26,7 +26,7 @@ You can read interesting discussions about it in the following issues:
 * [issue 509](https://github.com/pallets/click/issues/509)
 * [issue 1137](https://github.com/pallets/click/issues/1137)
 
-The aim of this package is to provide group options extensible functionality 
+The aim of this package is to provide group options with extensible functionality 
 using canonical and clean API (Click-like API as far as possible).
 
 ## Quickstart
@@ -43,14 +43,13 @@ $ pip install click-option-group
 
 Here is a simple example how to use option groups in your Click-based CLI.
 Just use `optgroup` for declaring option groups by decorating 
-your cli-function in Click-like API style.
+your command function in Click-like API style.
 
 ```python
 # app.py
 
 import click
 from click_option_group import optgroup, MutuallyExclusiveOptionGroup
-
 
 @click.command()
 @optgroup.group('Server configuration', 
@@ -89,7 +88,7 @@ Options:
   --help                          Show this message and exit.
 ```
 
-### How it works
+### How It Works
 
 Firstly, we declare the group:
 ```python
@@ -101,7 +100,7 @@ Also we can declare groups just using `optgroup()`:
 @optgroup('Server configuration', help='The configuration of some server connection')
 ```
 
-Secondly, we declare the grouped options:
+Secondly, we declare the grouped options below:
 ```python
 @optgroup.option('-h', '--host', default='localhost', help='Server host name')
 @optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
@@ -132,7 +131,8 @@ The correct code looks like:
 **click-option-group** checks the decorators order and raises 
 the exception if `optgroup.option` and `click.option` are mixed.
 
-Also if we try to use `optgroup.option` without `optgroup.grpup()`/`optgroup()` it will raise the exception.
+If we try to use `optgroup.option` without `optgroup.grpup()`/`optgroup()` declaration 
+it will raise the exception also.
 
 The following code is incorrect:
 ```python
@@ -144,3 +144,71 @@ The following code is incorrect:
 def cli(**params):
     pass
 ```
+
+## API Features
+
+Besides `optgroup` based decorators the package offers another way 
+to declare grouped options using `OptionGroup` based class objects directly.
+We can use the instances of these classes and use its `option` method as decorator for 
+declaring and adding options to the group.
+
+Here is an example how it looks:
+```python
+import click
+from click_option_group import OptionGroup, MutuallyExclusiveOptionGroup
+
+server_config = OptionGroup('Server configuration', help='The configuration of some server connection')
+input_sources = MutuallyExclusiveOptionGroup('Input data sources', required=True, help='The sources of the input data')
+
+@click.command()
+@server_config.option('-h', '--host', default='localhost', help='Server host name')
+@server_config.option('-p', '--port', type=int, default=8888, help='Server port')
+@input_sources.option('--tsv-file', type=click.File(), help='CSV/TSV input data file')
+@input_sources.option('--json-file', type=click.File(), help='JSON input data file')
+@click.option('--debug/--no-debug', default=False, help='Debug flag')
+def cli(**params):
+    print(params)
+
+if __name__ == '__main__':
+    cli()
+```
+
+In this case initially we create group objects and then we use `option` method for 
+declaring options.
+
+As well as in above example we cannot mix `option` and `click.option` decorators.
+The following code is incorrect and will raise the exception:
+```python
+@server_config.option('-h', '--host', default='localhost', help='Server host name')
+@click.option('--foo')  # ERROR
+@server_config.option('-p', '--port', type=int, default=8888, help='Server port')
+@input_sources.option('--tsv-file', type=click.File(), help='CSV/TSV input data file')
+@click.option('--bar')  # ERROR
+@input_sources.option('--json-file', type=click.File(), help='JSON input data file')
+```
+
+## Behavior and Relationship among Options
+
+The groups are useful to define the specific behavior and relationship among grouped options.
+
+**click-option-groups** offers two main classes: `OptionGroup` and `GroupedOption`.
+ 
+`OptionGroup` and `GroupedOption` classes contain the main functionality for support option groups. 
+They do not contain the specific behavior or relationship among grouped options.
+ 
+The specific behavior can be implemented by using the inheritance, mainly, in `OptionGroup` sub classes.
+**click-option-groups** offers some useful `OptionGroup` based classes out of the box:
+    * `RequiredAnyOptionGroup` -- At least one option from the group must be set.
+    * `RequiredAllOptionGroup` --  All options from the group must be set.
+    * `MutuallyExclusiveOptionGroup` -- Only one or none (dependent on `required` flag) option from the group must be set 
+
+`OptionGroup` based class can be specified via `cls` argument in `optgroup()`/`optgroup.group()` decorator or
+can be used directly when the second method is used.
+
+If you want to implement some complex behavior you can create a sub class of `GroupedOption` class and use
+your `GroupedOption` based class via `cls` argument in `optgroup.option`/`OptionGroup.option` decorator method.
+
+## Limitations
+
+The package does not support nested option groups. This is intentional.
+Nested option groups complicate the implementation and API and most often it is not necessary.
