@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
+PACKAGE_NAME = 'click_option_group'
 ROOT_DIR = pathlib.Path(__file__).parent
 
 
 def get_version():
     version = {}
-    version_file = ROOT_DIR / 'click_option_group' / '_version.py'
+    version_file = ROOT_DIR / PACKAGE_NAME / '_version.py'
     exec(version_file.read_text(), version)
     return version['__version__']
 
@@ -22,16 +23,34 @@ def get_long_description():
 setup(
     name='click-option-group',
     version=get_version(),
-    packages=find_packages(exclude='tests'),
+    packages=[PACKAGE_NAME],
     python_requires='>=3.6,<4',
     install_requires=[
         'Click>=7.0,<8',
     ],
     url='https://github.com/espdev/click-option-group',
+    project_urls={
+        "Code": 'https://github.com/espdev/click-option-group',
+        "Issue tracker": 'https://github.com/espdev/click-option-group/issues',
+    },
     license='BSD-3-Clause',
     author='Eugene Prilepin',
     author_email='esp.home@gmail.com',
-    description='option groups missing in Click',
+    description='Option groups missing in Click',
     long_description=get_long_description(),
     long_description_content_type='text/markdown',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Environment :: Console',
+        'Topic :: Software Development :: Libraries',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
 )
