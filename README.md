@@ -211,4 +211,4 @@ your `GroupedOption` based class via `cls` argument in `optgroup.option`/`Option
 ## Limitations
 
 The package does not support nested option groups. This is intentional.
-Nested option groups complicate the implementation and API and most often it is not necessary.
+Nested option groups complicate the implementation, API and CLI and most often it is not necessary.
