@@ -198,9 +198,9 @@ They do not contain the specific behavior or relationship among grouped options.
  
 The specific behavior can be implemented by using the inheritance, mainly, in `OptionGroup` sub classes.
 **click-option-groups** offers some useful `OptionGroup` based classes out of the box:
-    * `RequiredAnyOptionGroup` -- At least one option from the group must be set.
-    * `RequiredAllOptionGroup` --  All options from the group must be set.
-    * `MutuallyExclusiveOptionGroup` -- Only one or none (dependent on `required` flag) option from the group must be set 
+    - `RequiredAnyOptionGroup` -- At least one option from the group must be set.
+    - `RequiredAllOptionGroup` --  All options from the group must be set.
+    - `MutuallyExclusiveOptionGroup` -- Only one or none (dependent on `required` flag) option from the group must be set 
 
 `OptionGroup` based class can be specified via `cls` argument in `optgroup()`/`optgroup.group()` decorator or
 can be used directly when the second method is used.
