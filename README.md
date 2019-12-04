@@ -108,7 +108,7 @@ Secondly, we add the options to the group:
 
 The important point: do not mix `optgroup.option` and `click.option` decorators!
 
-Here is an incorrect code:
+An incorrect code example:
 ```python
 @optgroup.group('Server configuration', 
                 help='The configuration of some server connection')
@@ -118,7 +118,7 @@ Here is an incorrect code:
 @optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
 ```
 
-The correct code:
+The correct code looks like:
 ```python
 @click.option('--foo')
 @optgroup.group('Server configuration', 
@@ -129,3 +129,16 @@ The correct code:
 ```
 
 click-option-group checks the decorators order and raises the exception if `optgroup.option` and `click.option` are mixed.
+
+Also if we will be use `optgroup.option` without `optgroup.grpup()`/`optgroup()` it also raises exception.
+
+An incorrect code example:
+```python
+@click.command()
+@click.option('--foo')
+@optgroup.option('-h', '--host', default='localhost', help='Server host name')  # ERROR: Missing declaration of the group
+@optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
+@click.option('--bar')
+def cli(**params):
+    pass
+```
