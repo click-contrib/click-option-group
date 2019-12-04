@@ -42,7 +42,8 @@ $ pip install click-option-group
 ### A Simple Example
 
 Here is a simple example how to use option groups in your Click-based CLI.
-Just use `optgroup` for decorating your cli-function in Click-like API style.
+Just use `optgroup` for declaring option groups by decorating 
+your cli-function in Click-like API style.
 
 ```python
 # app.py
@@ -90,17 +91,17 @@ Options:
 
 ### How it works
 
-Firstly, we define the group:
+Firstly, we declare the group:
 ```python
 @optgroup.group('Server configuration', help='The configuration of some server connection')
 ```
 
-Also we can define groups just using `optgroup()`:
+Also we can declare groups just using `optgroup()`:
 ```python
 @optgroup('Server configuration', help='The configuration of some server connection')
 ```
 
-Secondly, we add the options to the group:
+Secondly, we declare the grouped options:
 ```python
 @optgroup.option('-h', '--host', default='localhost', help='Server host name')
 @optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
@@ -108,7 +109,7 @@ Secondly, we add the options to the group:
 
 The important point: do not mix `optgroup.option` and `click.option` decorators!
 
-An incorrect code example:
+The following code is incorrect:
 ```python
 @optgroup.group('Server configuration', 
                 help='The configuration of some server connection')
@@ -128,11 +129,12 @@ The correct code looks like:
 @click.option('--bar')
 ```
 
-click-option-group checks the decorators order and raises the exception if `optgroup.option` and `click.option` are mixed.
+**click-option-group** checks the decorators order and raises 
+the exception if `optgroup.option` and `click.option` are mixed.
 
-Also if we will use `optgroup.option` without `optgroup.grpup()`/`optgroup()` it will raise exception.
+Also if we try to use `optgroup.option` without `optgroup.grpup()`/`optgroup()` it will raise the exception.
 
-An incorrect code example:
+The following code is incorrect:
 ```python
 @click.command()
 @click.option('--foo')
