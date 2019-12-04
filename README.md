@@ -31,7 +31,7 @@ using canonical and clean API (Click-like API as far as possible).
 
 ## Quickstart
 
-## Installing 
+### Installing 
 
 Install and update using pip:
 
@@ -39,7 +39,7 @@ Install and update using pip:
 $ pip install click-option-group
 ```
 
-## A Simple Example
+### A Simple Example
 
 Here is a simple example how to use option groups in your Click-based CLI.
 Just use `optgroup` for decorating your cli-function in Click-like API style.
@@ -88,7 +88,7 @@ Options:
   --help                          Show this message and exit.
 ```
 
-# How it works
+### How it works
 
 Firstly, we define the group:
 ```python
