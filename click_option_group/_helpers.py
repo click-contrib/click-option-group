@@ -31,11 +31,7 @@ def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN, prefix: str = 'fake'
 
 
 def raise_mixing_decorators_error(wrong_option: click.Option, callback: abc.Callable):
-    ctx = click.get_current_context(silent=True)
-    if ctx:
-        error_hint = wrong_option.get_error_hint(ctx)
-    else:
-        error_hint = wrong_option.opts or [wrong_option.name]
+    error_hint = wrong_option.opts or [wrong_option.name]
 
     raise TypeError((
         "Grouped options must not be mixed with regular parameters while adding by decorator. "
