@@ -290,27 +290,8 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
     """Option group with mutually exclusive behavior for grouped options
 
     `MutuallyExclusiveOptionGroup` defines the behavior:
-        - Only one option from the group must be set if `required` is True
-        - Only one or none option from the group must be set if `required` is False
-
-    :param required: If this flag is `True` one option from the group must be set
+        - Only one or none option from the group must be set
     """
-
-    def __init__(self, name: ty.Optional[str] = None, *,
-                 help: ty.Optional[str] = None,
-                 required: bool = False) -> None:
-        super().__init__(name, help=help)
-        self._required = required
-
-    @property
-    def required(self) -> bool:
-        """Returns 'required' flag
-
-        If 'required' is True, at least one option from the group must be set.
-
-        :return: required flag
-        """
-        return self._required
 
     @property
     def forbidden_option_attrs(self) -> ty.List[str]:
@@ -318,8 +299,7 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
 
     @property
     def name_extra(self) -> ty.List[str]:
-        required = ['required'] if self.required else []
-        return super().name_extra + ['mutually_exclusive'] + required
+        return super().name_extra + ['mutually_exclusive']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
         option_names = set(self.get_options(ctx))
@@ -331,7 +311,25 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
             error_text += f'\n{self.get_error_hint(ctx, given_option_names)}'
             raise click.UsageError(error_text, ctx=ctx)
 
-        elif self.required and given_option_count == 0:
+
+class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
+    """Option group with required and mutually exclusive behavior for grouped options
+
+    `RequiredMutuallyExclusiveOptionGroup` defines the behavior:
+        - Only one required option from the group must be set if `required` is True
+    """
+
+    @property
+    def name_extra(self) -> ty.List[str]:
+        return super().name_extra + ['required']
+
+    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
+        super().handle_parse_result(option, ctx, opts)
+
+        option_names = set(self.get_option_names(ctx))
+        given_option_names = option_names.intersection(opts)
+
+        if len(given_option_names) == 0:
             error_text = ('Missing one of the required mutually exclusive options from '
                           f'"{self.get_default_name(ctx)}" option group:')
             error_text += f'\n{self.get_error_hint(ctx)}'

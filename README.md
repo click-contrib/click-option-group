@@ -49,7 +49,7 @@ your command function in Click-like API style.
 # app.py
 
 import click
-from click_option_group import optgroup, MutuallyExclusiveOptionGroup
+from click_option_group import optgroup, RequiredMutuallyExclusiveOptionGroup
 
 @click.command()
 @optgroup.group('Server configuration', 
@@ -58,7 +58,7 @@ from click_option_group import optgroup, MutuallyExclusiveOptionGroup
 @optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
 @optgroup.option('-n', '--attempts', type=int, default=3, help='The number of connection attempts')
 @optgroup.option('-t', '--timeout', type=int, default=30, help='The server response timeout')
-@optgroup.group('Input data sources', cls=MutuallyExclusiveOptionGroup, required=True, 
+@optgroup.group('Input data sources', cls=RequiredMutuallyExclusiveOptionGroup, 
                 help='The sources of the input data')
 @optgroup.option('--tsv-file', type=click.File(), help='CSV/TSV input data file')
 @optgroup.option('--json-file', type=click.File(), help='JSON input data file')
@@ -200,7 +200,8 @@ The specific behavior can be implemented by using the inheritance, mainly, in `O
 **click-option-groups** offers some useful `OptionGroup` based classes out of the box:
 - `RequiredAnyOptionGroup` -- At least one option from the group must be set.
 - `RequiredAllOptionGroup` --  All options from the group must be set.
-- `MutuallyExclusiveOptionGroup` -- Only one or none (dependent on `required` flag) option from the group must be set 
+- `MutuallyExclusiveOptionGroup` -- Only one or none option from the group must be set 
+- `RequiredMutuallyExclusiveOptionGroup` -- Only one required option from the group must be set
 
 `OptionGroup` based class can be specified via `cls` argument in `optgroup()`/`optgroup.group()` decorator or
 can be used directly when the second method is used.

@@ -16,7 +16,8 @@ from ._core import (
     OptionGroup,
     RequiredAnyOptionGroup,
     RequiredAllOptionGroup,
-    MutuallyExclusiveOptionGroup
+    MutuallyExclusiveOptionGroup,
+    RequiredMutuallyExclusiveOptionGroup,
 )
 
 from ._decorators import optgroup
@@ -29,4 +30,5 @@ __all__ = [
     'RequiredAnyOptionGroup',
     'RequiredAllOptionGroup',
     'MutuallyExclusiveOptionGroup',
+    'RequiredMutuallyExclusiveOptionGroup',
 ]
