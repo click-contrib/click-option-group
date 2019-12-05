@@ -31,12 +31,6 @@ class _NotAttachedOption(click.Option):
         self._all_not_attached_options = all_not_attached_options
 
     def handle_parse_result(self, ctx, opts, args):
-        self._raise_error(ctx)
-
-    def get_help_record(self, ctx):
-        self._raise_error(ctx)
-
-    def _raise_error(self, ctx):
         options_error_hint = ''
         for option in reversed(self._all_not_attached_options[ctx.command.callback]):
             options_error_hint += f'  {option.get_error_hint(ctx)}\n'
