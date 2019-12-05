@@ -280,7 +280,7 @@ class RequiredAllOptionGroup(OptionGroup):
         if not option_names.issubset(opts):
             required_names = option_names.difference(option_names.intersection(opts))
 
-            error_text = f'Missing all required options from "{self.get_default_name(ctx)}" option group:'
+            error_text = f'Missing required options from "{self.get_default_name(ctx)}" option group:'
             error_text += f'\n{self.get_error_hint(ctx, required_names)}'
 
             raise click.UsageError(error_text, ctx=ctx)
