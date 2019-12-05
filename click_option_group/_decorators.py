@@ -10,7 +10,6 @@ import click
 from ._core import OptionGroup
 from ._helpers import (
     get_callback_and_params,
-    get_fake_option_name,
     raise_mixing_decorators_error,
 )
 
@@ -27,9 +26,8 @@ class _NotAttachedOption(click.Option):
     Raises TypeError if not attached options exist.
     """
 
-    def __init__(self, param_decls=None, *, option_decls, all_not_attached_options, **attrs):
-        super().__init__(param_decls, expose_value=False, hidden=False, **attrs)
-        self.option_decls = option_decls
+    def __init__(self, param_decls=None, *, all_not_attached_options, **attrs):
+        super().__init__(param_decls, expose_value=False, hidden=False, is_eager=True, **attrs)
         self._all_not_attached_options = all_not_attached_options
 
     def handle_parse_result(self, ctx, opts, args):
@@ -41,8 +39,7 @@ class _NotAttachedOption(click.Option):
     def _raise_error(self, ctx):
         options_error_hint = ''
         for option in reversed(self._all_not_attached_options[ctx.command.callback]):
-            decls = option.option_decls
-            options_error_hint += f'  {click.Option(decls).get_error_hint(ctx)}\n'
+            options_error_hint += f'  {option.get_error_hint(ctx)}\n'
         options_error_hint = options_error_hint[:-1]
 
         raise TypeError((
@@ -152,8 +149,7 @@ class _OptGroup:
 
     def _add_not_attached_option(self, func, param_decls):
         click.option(
-            get_fake_option_name(),
-            option_decls=param_decls,
+            *param_decls,
             all_not_attached_options=self._not_attached_options,
             cls=_NotAttachedOption
         )(func)
