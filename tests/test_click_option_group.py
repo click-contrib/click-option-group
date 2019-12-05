@@ -108,6 +108,30 @@ def test_missing_group_decl_first_api(runner):
 
     assert result.exception
     assert TypeError == result.exc_info[0]
+    assert 'Missing option group decorator' in str(result.exc_info[1])
+    assert '--foo' in str(result.exc_info[1])
+    assert '--bar' in str(result.exc_info[1])
+
+    result = runner.invoke(cli, [])
+
+    assert result.exception
+    assert TypeError == result.exc_info[0]
+    assert 'Missing option group' in str(result.exc_info[1])
+    assert '--foo' in str(result.exc_info[1])
+    assert '--bar' in str(result.exc_info[1])
+
+    result = runner.invoke(cli, ['--hello1', 'hello1'])
+
+    assert result.exception
+    assert TypeError == result.exc_info[0]
+    assert 'Missing option group' in str(result.exc_info[1])
+    assert '--foo' in str(result.exc_info[1])
+    assert '--bar' in str(result.exc_info[1])
+
+    result = runner.invoke(cli, ['--foo', 'foo'])
+
+    assert result.exception
+    assert TypeError == result.exc_info[0]
     assert 'Missing option group' in str(result.exc_info[1])
     assert '--foo' in str(result.exc_info[1])
     assert '--bar' in str(result.exc_info[1])
@@ -135,6 +159,15 @@ def test_incorrect_option_group_cls():
     with pytest.raises(TypeError, match=r"must be a subclass of 'OptionGroup' class"):
         @click.command()
         @optgroup(cls=object)
+        @optgroup.option('--foo')
+        def cli(**params):
+            pass
+
+
+def test_option_group_unexpected_arguments():
+    with pytest.raises(TypeError, match=r"'OptionGroup' constructor got an unexpected keyword argument 'oops'"):
+        @click.command()
+        @optgroup(oops=True)
         @optgroup.option('--foo')
         def cli(**params):
             pass
@@ -561,3 +594,22 @@ def test_subcommand_mix_decl_second_api():
         @group.option('--bar')
         def command(**params):
             pass
+
+
+def test_command_first_api(runner):
+    @optgroup('Group 1')
+    @optgroup.option('--foo')
+    @optgroup.option('--bar')
+    @click.command()
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli, ['--help'])
+    assert not result.exception
+    assert 'Group 1:' in result.output
+    assert '--foo' in result.output
+    assert '--bar' in result.output
+
+    result = runner.invoke(cli, ['--foo', 'foo', '--bar', 'bar'])
+    assert not result.exception
+    assert 'foo,bar' in result.output
