@@ -72,7 +72,7 @@ def test_mix_decl_first_api():
         @optgroup.option('--foo')
         @click.option('--hello')
         @optgroup.option('--bar')
-        def cli(**params):
+        def cli1(**params):
             pass
 
     with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\]"):
@@ -81,7 +81,7 @@ def test_mix_decl_first_api():
         @click.option('--hello')
         @optgroup.option('--foo')
         @optgroup.option('--bar')
-        def cli(**params):
+        def cli2(**params):
             pass
 
     with pytest.raises(TypeError, match=r"Check decorator position for \['--hello2'\]"):
@@ -91,7 +91,7 @@ def test_mix_decl_first_api():
         @optgroup.option('--foo')
         @click.option('--hello2')
         @optgroup.option('--bar')
-        def cli(**params):
+        def cli3(**params):
             pass
 
 
@@ -177,14 +177,14 @@ def test_incorrect_grouped_option_cls():
     @click.command()
     @optgroup()
     @optgroup.option('--foo', cls=GroupedOption)
-    def cli(**params):
+    def cli1(**params):
         pass
 
     with pytest.raises(TypeError, match=r"must be a subclass of 'GroupedOption' class"):
         @click.command()
         @optgroup()
         @optgroup.option('--foo', cls=click.Option)
-        def cli(**params):
+        def cli2(**params):
             pass
 
 
@@ -457,36 +457,36 @@ def test_subcommand_first_api(runner):
 
 
 def test_subcommand_mix_decl_first_api():
-    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'cli'"):
+    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'cli1'"):
         @click.group()
         @optgroup('Group 1', help='Group 1 description')
         @optgroup.option('--foo')
         @click.option('--hello')
         @optgroup.option('--bar')
-        def cli(**params):
+        def cli1(**params):
             pass
 
-        @cli.command()
+        @cli1.command()
         @optgroup('Group 2', help='Group 2 description')
         @optgroup.option('--foo')
         @optgroup.option('--bar')
-        def command(**params):
+        def command1(**params):
             pass
 
-    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'command'"):
+    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'command2'"):
         @click.group()
         @optgroup('Group 1', help='Group 1 description')
         @optgroup.option('--foo')
         @optgroup.option('--bar')
-        def cli(**params):
+        def cli2(**params):
             pass
 
-        @cli.command()
+        @cli2.command()
         @optgroup('Group 2', help='Group 2 description')
         @optgroup.option('--foo')
         @click.option('--hello')
         @optgroup.option('--bar')
-        def command(**params):
+        def command2(**params):
             pass
 
 
@@ -567,32 +567,32 @@ def test_group_context_second_api(runner):
 def test_subcommand_mix_decl_second_api():
     group = OptionGroup()
 
-    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'cli'"):
+    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'cli1'"):
         @click.group()
         @group.option('--foo')
         @click.option('--hello')
         @group.option('--bar')
-        def cli(**params):
+        def cli1(**params):
             pass
 
-        @cli.command()
+        @cli1.command()
         @group.option('--foo')
         @group.option('--bar')
-        def command(**params):
+        def command1(**params):
             pass
 
-    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'command'"):
+    with pytest.raises(TypeError, match=r"Check decorator position for \['--hello'\] option in 'command2'"):
         @click.group()
         @group.option('--foo')
         @group.option('--bar')
-        def cli(**params):
+        def cli2(**params):
             pass
 
-        @cli.command()
+        @cli2.command()
         @group.option('--foo')
         @click.option('--hello')
         @group.option('--bar')
-        def command(**params):
+        def command2(**params):
             pass
 
 
