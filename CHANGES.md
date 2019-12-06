@@ -1,3 +1,7 @@
+# v0.2.2
+* Add true lineno in warning when declaring empty option group
+* Update readme
+
 # v0.2.1
 * Use RuntimeWarning and stacklevel 2 when declaring empty option group
 * Update readme

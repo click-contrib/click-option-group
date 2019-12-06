@@ -107,7 +107,7 @@ Secondly, we declare the grouped options below:
 @optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
 ```
 
-### Checking decorators
+### Checking Declarations
 
 The important point: do not mix `optgroup.option` and `click.option` decorators!
 
