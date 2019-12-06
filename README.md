@@ -205,8 +205,8 @@ The groups are useful to define the specific behavior and relationship among gro
 
 **click-option-groups** provides two main classes: `OptionGroup` and `GroupedOption`.
 
-- `OptionGroup` class is new entity that provides the abstraction for grouping options and manage it.
-- `GroupedOption` class is inherited from `click.Option` and provides the abstraction for grouped options.
+- `OptionGroup` class is a new entity for Click that provides the abstraction for grouping options and manage it.
+- `GroupedOption` class is inherited from `click.Option` and provides the functionality for grouped options.
 
 `OptionGroup` and `GroupedOption` classes contain the basic functionality for support option groups. 
 Both these classes do not contain the specific behavior or relationship among grouped options.
