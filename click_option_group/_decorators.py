@@ -4,6 +4,7 @@ import typing as ty
 import collections.abc as abc
 import collections
 import warnings
+import inspect
 
 import click
 
@@ -62,10 +63,15 @@ class _OptGroup:
     def __init__(self) -> None:
         self._decorating_state: ty.Dict[abc.Callable, ty.List[OptionStackItem]] = collections.defaultdict(list)
         self._not_attached_options: ty.Dict[abc.Callable, ty.List[click.Option]] = collections.defaultdict(list)
+        self._outer_frame_index = 1
 
     def __call__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None,
                  cls: ty.Optional[ty.Type[OptionGroup]] = None, **attrs):
-        return self.group(name, cls=cls, help=help, **attrs)
+        try:
+            self._outer_frame_index = 2
+            return self.group(name, cls=cls, help=help, **attrs)
+        finally:
+            self._outer_frame_index = 1
 
     def group(self, name: ty.Optional[str] = None, *,
               cls: ty.Optional[ty.Type[OptionGroup]] = None,
@@ -87,14 +93,17 @@ class _OptGroup:
             if not issubclass(cls, OptionGroup):
                 raise TypeError("'cls' must be a subclass of 'OptionGroup' class.")
 
+        frame = inspect.getouterframes(inspect.currentframe())[self._outer_frame_index]
+        lineno = frame.lineno
+
         def decorator(func):
             callback, params = get_callback_and_params(func)
 
             if callback not in self._decorating_state:
                 with_name = f' "{name}"' if name else ''
-                warnings.warn(
-                    f'The empty option group{with_name} was found. The group will not be added.',
-                    RuntimeWarning, stacklevel=2)
+                warnings.warn((f'The empty option group{with_name} was found (line {lineno}) '
+                               f'for "{callback.__name__}". The group will not be added.'),
+                              RuntimeWarning, stacklevel=2)
                 return func
 
             option_stack = self._decorating_state.pop(callback)
