@@ -138,7 +138,7 @@ def test_missing_group_decl_first_api(runner):
 
 
 def test_missing_grouped_options_decl_first_api(runner):
-    with pytest.warns(UserWarning, match=r'The empty option group "Group 1"'):
+    with pytest.warns(RuntimeWarning, match=r'The empty option group "Group 1"'):
         @click.command()
         @click.option('--hello1')
         @optgroup('Group 1', help='Group 1 description')

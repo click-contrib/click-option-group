@@ -94,7 +94,7 @@ class _OptGroup:
                 with_name = f' "{name}"' if name else ''
                 warnings.warn(
                     f'The empty option group{with_name} was found. The group will not be added.',
-                    UserWarning)
+                    RuntimeWarning, stacklevel=2)
                 return func
 
             option_stack = self._decorating_state.pop(callback)
