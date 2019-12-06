@@ -107,41 +107,52 @@ Secondly, we declare the grouped options below:
 @optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
 ```
 
+### Checking decorators
+
 The important point: do not mix `optgroup.option` and `click.option` decorators!
-
-The following code is incorrect:
-```python
-@optgroup.group('Server configuration', 
-                help='The configuration of some server connection')
-@click.option('--foo')  # ERROR
-@optgroup.option('-h', '--host', default='localhost', help='Server host name')
-@click.option('--bar')  # ERROR
-@optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
-```
-
-The correct code looks like:
-```python
-@click.option('--foo')
-@optgroup.group('Server configuration', 
-                help='The configuration of some server connection')
-@optgroup.option('-h', '--host', default='localhost', help='Server host name')
-@optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
-@click.option('--bar')
-```
 
 **click-option-group** checks the decorators order and raises 
 the exception if `optgroup.option` and `click.option` are mixed.
 
+The following code is incorrect:
+```python
+@optgroup.group('My group')
+@click.option('--hello')  # ERROR
+@optgroup.option('--foo')
+@click.option('--spam')  # ERROR
+@optgroup.option('--bar')
+```
+
+The correct code looks like:
+```python
+@click.option('--hello')
+@optgroup.group('My group')
+@optgroup.option('--foo')
+@optgroup.option('--bar')
+@click.option('--spam')
+```
+
 If we try to use `optgroup.option` without `optgroup.grpup()`/`optgroup()` declaration 
-it will raise the exception also.
+it also will raise the exception.
 
 The following code is incorrect:
 ```python
 @click.command()
-@click.option('--foo')
-@optgroup.option('-h', '--host', default='localhost', help='Server host name')  # ERROR: Missing declaration of the group
-@optgroup.option('-p', '--port', type=int, default=8888, help='Server port')
-@click.option('--bar')
+@click.option('--hello')
+@optgroup.option('--foo')  # ERROR: Missing declaration of the option group
+@optgroup.option('--bar')  # ERROR: Missing declaration of the option group
+@click.option('--spam')
+def cli(**params):
+    pass
+```
+
+If we declare only option group without the options it will raise warning.
+
+```python
+@click.command()
+@click.option('--hello')
+@optgroup.group('My group')  # WARN: The empty option group
+@click.option('--spam')
 def cli(**params):
     pass
 ```
