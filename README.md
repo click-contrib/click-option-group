@@ -167,10 +167,10 @@ declaring and adding options to the group.
 Here is an example how it looks:
 ```python
 import click
-from click_option_group import OptionGroup, MutuallyExclusiveOptionGroup
+from click_option_group import OptionGroup, RequiredMutuallyExclusiveOptionGroup
 
 server_config = OptionGroup('Server configuration', help='The configuration of some server connection')
-input_sources = MutuallyExclusiveOptionGroup('Input data sources', required=True, help='The sources of the input data')
+input_sources = RequiredMutuallyExclusiveOptionGroup('Input data sources', help='The sources of the input data')
 
 @click.command()
 @server_config.option('-h', '--host', default='localhost', help='Server host name')
