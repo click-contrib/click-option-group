@@ -1,3 +1,7 @@
+# v0.2.1
+* Use RuntimeWarning and stacklevel 2 when declaring empty option group
+* Update readme
+
 # v0.2.0
 * Implement `RequiredMutuallyExclusiveOptionGroup` class instead of `required` argument for `MutuallyExclusiveOptionGroup`
 * Add tests with 100% coverage
