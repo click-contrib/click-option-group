@@ -316,7 +316,7 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
     """Option group with required and mutually exclusive behavior for grouped options
 
     `RequiredMutuallyExclusiveOptionGroup` defines the behavior:
-        - Only one required option from the group must be set if `required` is True
+        - Only one required option from the group must be set
     """
 
     @property
