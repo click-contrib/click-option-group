@@ -203,25 +203,38 @@ The following code is incorrect and will raise the exception:
 
 The groups are useful to define the specific behavior and relationship among grouped options.
 
-**click-option-groups** offers two main classes: `OptionGroup` and `GroupedOption`.
- 
-`OptionGroup` and `GroupedOption` classes contain the main functionality for support option groups. 
-They do not contain the specific behavior or relationship among grouped options.
+**click-option-groups** provides two main classes: `OptionGroup` and `GroupedOption`.
+
+- `OptionGroup` class is new entity that provides the abstraction for grouping options and manage it.
+- `GroupedOption` class is inherited from `click.Option` and provides the abstraction for grouped options.
+
+`OptionGroup` and `GroupedOption` classes contain the basic functionality for support option groups. 
+Both these classes do not contain the specific behavior or relationship among grouped options.
  
 The specific behavior can be implemented by using the inheritance, mainly, in `OptionGroup` sub classes.
-**click-option-groups** offers some useful `OptionGroup` based classes out of the box:
+**click-option-groups** provides some useful `OptionGroup` based classes out of the box:
 - `RequiredAnyOptionGroup` -- At least one option from the group must be set.
 - `RequiredAllOptionGroup` --  All options from the group must be set.
 - `MutuallyExclusiveOptionGroup` -- Only one or none option from the group must be set 
 - `RequiredMutuallyExclusiveOptionGroup` -- Only one required option from the group must be set
 
 `OptionGroup` based class can be specified via `cls` argument in `optgroup()`/`optgroup.group()` decorator or
-can be used directly when the second method is used.
+can be used directly when the second API way is used.
 
 If you want to implement some complex behavior you can create a sub class of `GroupedOption` class and use
 your `GroupedOption` based class via `cls` argument in `optgroup.option`/`OptionGroup.option` decorator method.
 
+```python
+@click.command()
+@optgroup('My group', cls=MyCustomOptionGroup)
+@optgroup.option('--foo', cls=MyCustomGroupedOption)
+...
+```
+
 ## Limitations
 
-The package does not support nested option groups. This is intentional.
+The package does not support nested option groups (option subgroups). This is intentional.
 Nested option groups complicate the implementation, API and CLI and most often it is not necessary.
+
+If you think you need to nested option groups try redesign your CLI and doing it with 
+[nesting commands](https://click.palletsprojects.com/en/7.x/quickstart/#nesting-commands). 
