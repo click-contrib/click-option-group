@@ -28,10 +28,10 @@ setup(
     install_requires=[
         'Click>=7.0,<8',
     ],
-    url='https://github.com/espdev/click-option-group',
+    url='https://github.com/click-contrib/click-option-group',
     project_urls={
-        "Code": 'https://github.com/espdev/click-option-group',
-        "Issue tracker": 'https://github.com/espdev/click-option-group/issues',
+        "Code": 'https://github.com/click-contrib/click-option-group',
+        "Issue tracker": 'https://github.com/click-contrib/click-option-group/issues',
     },
     license='BSD-3-Clause',
     author='Eugene Prilepin',

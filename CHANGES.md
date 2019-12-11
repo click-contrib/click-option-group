@@ -1,3 +1,6 @@
+# v0.2.3
+* Transfer the repo to click-contrib organisation
+
 # v0.2.2
 * Add true lineno in warning when declaring empty option group
 * Update readme
