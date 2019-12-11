@@ -2,7 +2,8 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/click-option-group.svg)](https://pypi.python.org/pypi/click-option-group)
 [![Build status](https://travis-ci.org/click-contrib/click-option-group.svg?branch=master)](https://travis-ci.org/click-contrib/click-option-group)
-[![Coverage Status](https://coveralls.io/repos/github/click-contrib/click-option-group/badge.svg?branch=master)](https://coveralls.io/github/click-contrib/click-option-group?branch=master)![Supported Python versions](https://img.shields.io/pypi/pyversions/click-option-group.svg)
+[![Coverage Status](https://coveralls.io/repos/github/click-contrib/click-option-group/badge.svg?branch=master)](https://coveralls.io/github/click-contrib/click-option-group?branch=master)
+![Supported Python versions](https://img.shields.io/pypi/pyversions/click-option-group.svg)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
