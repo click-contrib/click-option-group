@@ -9,7 +9,7 @@ Option groups missing in Click
 :license: BSD, see LICENSE for more details.
 """
 
-from ._version import __version__  # noqa
+from ._version import __version__
 
 from ._core import (
     GroupedOption,
@@ -24,6 +24,7 @@ from ._decorators import optgroup
 
 
 __all__ = [
+    '__version__',
     'optgroup',
     'GroupedOption',
     'OptionGroup',

@@ -17,7 +17,11 @@ def get_version():
 
 def get_long_description():
     readme = ROOT_DIR / 'README.md'
-    return readme.read_text(encoding='utf-8')
+    changelog = ROOT_DIR / 'CHANGELOG.md'
+    return '{}\n{}'.format(
+        readme.read_text(encoding='utf-8'),
+        changelog.read_text(encoding='utf-8')
+    )
 
 
 setup(
@@ -28,6 +32,10 @@ setup(
     install_requires=[
         'Click>=7.0,<8',
     ],
+    extras_require={
+        'docs': ['sphinx>=2.3', 'Pallets-Sphinx-Themes', 'm2r'],
+        'tests': ['pytest'],
+    },
     url='https://github.com/click-contrib/click-option-group',
     project_urls={
         "Code": 'https://github.com/click-contrib/click-option-group',
