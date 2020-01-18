@@ -40,6 +40,7 @@ setup(
     project_urls={
         "Code": 'https://github.com/click-contrib/click-option-group',
         "Issue tracker": 'https://github.com/click-contrib/click-option-group/issues',
+        "Documentation": 'https://click-option-group.readthedocs.io',
     },
     license='BSD-3-Clause',
     author='Eugene Prilepin',
