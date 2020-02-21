@@ -48,7 +48,12 @@ class GroupedOption(click.Option):
         return super().handle_parse_result(ctx, opts, args)
 
     def get_help_record(self, ctx: click.Context):
-        opts, opt_help = super().get_help_record(ctx)
+        help_record = super().get_help_record(ctx)
+        if help_record is None:
+            # this happens if the option is hidden
+            return help_record
+
+        opts, opt_help = help_record
 
         formatter = ctx.make_formatter()
         with formatter.indentation():
@@ -65,6 +70,8 @@ class _GroupTitleFakeOption(click.Option):
         super().__init__(param_decls, expose_value=False, **attrs)
 
     def get_help_record(self, ctx: click.Context):
+        if self.hidden:
+            return None
         return self.__group.get_help_record(ctx)
 
 
