@@ -26,13 +26,14 @@ class GroupedOption(click.Option):
     """
 
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
+        super().__init__(param_decls, **attrs)
+
         for attr in group.forbidden_option_attrs:
             if attr in attrs:
                 raise TypeError(
-                    f"'{attr}' attribute is not allowed for '{type(group).__name__}' options.")
+                    f"'{attr}' attribute is not allowed for '{type(group).__name__}' option `{self.name}'.")
 
         self.__group = group
-        super().__init__(param_decls, **attrs)
 
     @property
     def group(self) -> 'OptionGroup':
@@ -48,7 +49,12 @@ class GroupedOption(click.Option):
         return super().handle_parse_result(ctx, opts, args)
 
     def get_help_record(self, ctx: click.Context):
-        opts, opt_help = super().get_help_record(ctx)
+        help_record = super().get_help_record(ctx)
+        if help_record is None:
+            # this happens if the option is hidden
+            return help_record
+
+        opts, opt_help = help_record
 
         formatter = ctx.make_formatter()
         with formatter.indentation():
@@ -79,9 +85,10 @@ class OptionGroup:
     """
 
     def __init__(self, name: ty.Optional[str] = None, *,
-                 help: ty.Optional[str] = None) -> None:
+                 hidden=False, help: ty.Optional[str] = None) -> None:
         self._name = name if name else ''
         self._help = inspect.cleandoc(help if help else '')
+        self._hidden = hidden
 
         self._options = collections.defaultdict(weakref.WeakValueDictionary)
         self._group_title_options = weakref.WeakValueDictionary()
@@ -132,6 +139,8 @@ class OptionGroup:
         :param ctx: Click Context object
         :return: the tuple of two fileds: `(name, help)`
         """
+        if all(o.hidden for o in self.get_options(ctx).values()):
+            return None
 
         name = self.get_default_name(ctx)
         help_ = self.help if self.help else ''
@@ -153,6 +162,8 @@ class OptionGroup:
         def decorator(func):
             option_attrs = attrs.copy()
             option_attrs.setdefault('cls', GroupedOption)
+            if self._hidden:
+                option_attrs.setdefault('hidden', self._hidden)
 
             if not issubclass(option_attrs['cls'], GroupedOption):
                 raise TypeError("'cls' argument must be a subclass of 'GroupedOption' class.")
@@ -251,6 +262,11 @@ class RequiredAnyOptionGroup(OptionGroup):
         if option.name in opts:
             return
 
+        if all(o.hidden for o in self.get_options(ctx).values()):
+            error_text = (f'Need at least one non-hidden option in RequiredAnyOptionGroup '
+                          f'"{self.get_default_name(ctx)}".')
+            raise TypeError(error_text)
+
         option_names = set(self.get_options(ctx))
 
         if not option_names.intersection(opts):
@@ -268,7 +284,7 @@ class RequiredAllOptionGroup(OptionGroup):
 
     @property
     def forbidden_option_attrs(self) -> ty.List[str]:
-        return ['required']
+        return ['required', 'hidden']
 
     @property
     def name_extra(self) -> ty.List[str]:

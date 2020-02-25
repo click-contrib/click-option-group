@@ -409,7 +409,7 @@ def test_required_mutually_exclusive_option_group(runner):
     RequiredMutuallyExclusiveOptionGroup,
 ])
 def test_forbidden_option_attrs(cls):
-    with pytest.raises(TypeError, match=f"'required' attribute is not allowed for '{cls.__name__}' options"):
+    with pytest.raises(TypeError, match=f"'required' attribute is not allowed for '{cls.__name__}' option `foo'"):
         @click.command()
         @optgroup(cls=cls)
         @optgroup.option('--foo', required=True)
@@ -613,3 +613,85 @@ def test_command_first_api(runner):
     result = runner.invoke(cli, ['--foo', 'foo', '--bar', 'bar'])
     assert not result.exception
     assert 'foo,bar' in result.output
+
+
+def test_hidden_option(runner):
+    @click.command()
+    @click.option('--hello')
+    @optgroup('Group 1', help='Group 1 description')
+    @optgroup.option('--foo1')
+    @optgroup.option('--bar1', hidden=True)
+    @click.option('--goodbye')
+    def cli(hello, foo1, bar1, goodbye):
+        click.echo(f'{foo1},{bar1}')
+
+    result = runner.invoke(cli, ['--help'])
+
+    assert not result.exception
+    assert 'Group 1:' in result.output
+    assert 'Group 1 description' in result.output
+    assert 'bar1' not in result.output
+
+    result = runner.invoke(cli, [
+        '--foo1', 'foo1', '--bar1', 'bar1',
+    ])
+
+    assert not result.exception
+    assert 'foo1,bar1' in result.output
+
+    with pytest.raises(
+      TypeError, match=f"'hidden' attribute is not allowed for 'RequiredAllOptionGroup' option `bar'"):
+        @click.command()
+        @optgroup(cls=RequiredAllOptionGroup)
+        @optgroup.option('--foo')
+        @optgroup.option('--bar', hidden=True)
+        def cli(foo, bar):
+            click.echo(f'{foo},{bar}')
+
+    @click.command()
+    @optgroup(cls=RequiredAnyOptionGroup)
+    @optgroup.option('--foo', hidden=True)
+    @optgroup.option('--bar', hidden=True)
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli,)
+    assert isinstance(result.exception, TypeError)
+    assert "Need at least one non-hidden" in str(result.exception)
+
+    @click.command()
+    @optgroup("Group 1", help="Group 1 description")
+    @optgroup.option('--foo', hidden=True)
+    @optgroup.option('--bar', hidden=True)
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli, ['--help'])
+    assert not result.exception
+    assert "Group 1" not in result.output
+
+    @click.command()
+    @optgroup("Group 1", help="Group 1 description", hidden=True)
+    @optgroup.option('--foo')
+    @optgroup.option('--bar')
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli, ['--help'])
+    assert not result.exception
+    assert "Group 1" not in result.output
+    assert "foo" not in result.output
+    assert "bar" not in result.output
+
+    @click.command()
+    @optgroup("Group 1", help="Group 1 description", hidden=True)
+    @optgroup.option('--foo', hidden=False)  # override hidden of group
+    @optgroup.option('--bar')
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli, ['--help'])
+    assert not result.exception
+    assert "Group 1" in result.output
+    assert "foo" in result.output
+    assert "bar" not in result.output
