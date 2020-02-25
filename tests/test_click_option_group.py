@@ -613,3 +613,28 @@ def test_command_first_api(runner):
     result = runner.invoke(cli, ['--foo', 'foo', '--bar', 'bar'])
     assert not result.exception
     assert 'foo,bar' in result.output
+
+
+def test_hidden_option(runner):
+    @click.command()
+    @click.option('--hello')
+    @optgroup('Group 1', help='Group 1 description')
+    @optgroup.option('--foo1')
+    @optgroup.option('--bar1', hidden=True)
+    @click.option('--goodbye')
+    def cli(hello, foo1, bar1, goodbye):
+        click.echo(f'{foo1},{bar1}')
+
+    result = runner.invoke(cli, ['--help'])
+
+    assert not result.exception
+    assert 'Group 1:' in result.output
+    assert 'Group 1 description' in result.output
+    assert 'bar1' not in result.output
+
+    result = runner.invoke(cli, [
+        '--foo1', 'foo1', '--bar1', 'bar1',
+    ])
+
+    assert not result.exception
+    assert 'foo1,bar1' in result.output
