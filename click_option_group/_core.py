@@ -70,8 +70,6 @@ class _GroupTitleFakeOption(click.Option):
         super().__init__(param_decls, expose_value=False, **attrs)
 
     def get_help_record(self, ctx: click.Context):
-        if self.hidden:
-            return None
         return self.__group.get_help_record(ctx)
 
 
