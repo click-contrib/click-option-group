@@ -140,6 +140,9 @@ class OptionGroup:
         :return: the tuple of two fileds: `(name, help)`
         """
 
+        if all(o.hidden for o in self.get_options(ctx).values()):
+            return None
+
         name = self.get_default_name(ctx)
         help_ = self.help if self.help else ''
 
