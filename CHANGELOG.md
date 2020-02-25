@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.0
+* Add support for hidden options inside groups (PR [#2](https://github.com/click-contrib/click-option-group/pull/2))
+
 ## v0.2.3
 * Transfer the repo to click-contrib organisation
 
