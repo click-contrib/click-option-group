@@ -660,3 +660,29 @@ def test_hidden_option(runner):
     result = runner.invoke(cli, ['--help'])
     assert not result.exception
     assert "Group 1" not in result.output
+
+    @click.command()
+    @optgroup("Group 1", help="Group 1 description", hidden=True)
+    @optgroup.option('--foo')
+    @optgroup.option('--bar')
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli, ['--help'])
+    assert not result.exception
+    assert "Group 1" not in result.output
+    assert "foo" not in result.output
+    assert "bar" not in result.output
+
+    @click.command()
+    @optgroup("Group 1", help="Group 1 description", hidden=True)
+    @optgroup.option('--foo', hidden=False)  # override hidden of group
+    @optgroup.option('--bar')
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli, ['--help'])
+    assert not result.exception
+    assert "Group 1" in result.output
+    assert "foo" in result.output
+    assert "bar" not in result.output

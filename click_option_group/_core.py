@@ -84,9 +84,10 @@ class OptionGroup:
     """
 
     def __init__(self, name: ty.Optional[str] = None, *,
-                 help: ty.Optional[str] = None) -> None:
+                 hidden=False, help: ty.Optional[str] = None) -> None:
         self._name = name if name else ''
         self._help = inspect.cleandoc(help if help else '')
+        self._hidden = hidden
 
         self._options = collections.defaultdict(weakref.WeakValueDictionary)
         self._group_title_options = weakref.WeakValueDictionary()
@@ -137,7 +138,6 @@ class OptionGroup:
         :param ctx: Click Context object
         :return: the tuple of two fileds: `(name, help)`
         """
-
         if all(o.hidden for o in self.get_options(ctx).values()):
             return None
 
@@ -161,6 +161,7 @@ class OptionGroup:
         def decorator(func):
             option_attrs = attrs.copy()
             option_attrs.setdefault('cls', GroupedOption)
+            option_attrs.setdefault('hidden', self._hidden)
 
             if not issubclass(option_attrs['cls'], GroupedOption):
                 raise TypeError("'cls' argument must be a subclass of 'GroupedOption' class.")
