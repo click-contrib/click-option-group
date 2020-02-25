@@ -651,6 +651,17 @@ def test_hidden_option(runner):
     assert "not allowed" in result.output
 
     @click.command()
+    @optgroup(cls=RequiredAnyOptionGroup)
+    @optgroup.option('--foo', hidden=True)
+    @optgroup.option('--bar', hidden=True)
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+
+    result = runner.invoke(cli, ['--help'])
+    assert result.exception
+    assert "Need at least one non-hidden" in result.output
+
+    @click.command()
     @optgroup("Group 1", help="Group 1 description")
     @optgroup.option('--foo', hidden=True)
     @optgroup.option('--bar', hidden=True)
