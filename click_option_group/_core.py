@@ -269,8 +269,9 @@ class RequiredAnyOptionGroup(OptionGroup):
             raise click.UsageError(error_text, ctx=ctx)
 
     def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
-        if self._hidden or all(o.hidden for o in self.get_options(ctx).values()):
-            error_text = f'Need at least one non-hidden option in RequiredAnyOptionGroup "{self.get_default_name(ctx)}".'
+        if all(o.hidden for o in self.get_options(ctx).values()):
+            error_text = (f'Need at least one non-hidden option in RequiredAnyOptionGroup '
+                          '"{self.get_default_name(ctx)}".')
             raise click.UsageError(error_text, ctx=ctx)
 
         return super().get_help_record(ctx)
