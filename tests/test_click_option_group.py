@@ -647,8 +647,8 @@ def test_hidden_option(runner):
         click.echo(f'{foo},{bar}')
 
     result = runner.invoke(cli, ['--help'])
-    assert result.exception
-    assert "not allowed" in result.output
+    assert isinstance(result.exception, TypeError)
+    assert "not allowed" in str(result.exception)
 
     @click.command()
     @optgroup(cls=RequiredAnyOptionGroup)
@@ -658,8 +658,8 @@ def test_hidden_option(runner):
         click.echo(f'{foo},{bar}')
 
     result = runner.invoke(cli, ['--help'])
-    assert result.exception
-    assert "Need at least one non-hidden" in result.output
+    assert isinstance(result.exception, TypeError)
+    assert "Need at least one non-hidden" in str(result.exception)
 
     @click.command()
     @optgroup("Group 1", help="Group 1 description")

@@ -271,8 +271,8 @@ class RequiredAnyOptionGroup(OptionGroup):
     def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
         if all(o.hidden for o in self.get_options(ctx).values()):
             error_text = (f'Need at least one non-hidden option in RequiredAnyOptionGroup '
-                          '"{self.get_default_name(ctx)}".')
-            raise click.UsageError(error_text, ctx=ctx)
+                          f'"{self.get_default_name(ctx)}".')
+            raise TypeError(error_text)
 
         return super().get_help_record(ctx)
 
@@ -306,7 +306,7 @@ class RequiredAllOptionGroup(OptionGroup):
         for option_name, option in self.get_options(ctx).items():
             if option.hidden:
                 error_text = f'Hidden options ("{option_name}") are not allowed inside RequiredAllOptionGroup.'
-                raise click.UsageError(error_text, ctx=ctx)
+                raise TypeError(error_text)
 
         return super().get_help_record(ctx)
 
