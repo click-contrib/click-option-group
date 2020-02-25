@@ -26,13 +26,14 @@ class GroupedOption(click.Option):
     """
 
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
+        super().__init__(param_decls, **attrs)
+
         for attr in group.forbidden_option_attrs:
             if attr in attrs:
                 raise TypeError(
-                    f"'{attr}' attribute is not allowed for '{type(group).__name__}' options.")
+                    f"'{attr}' attribute is not allowed for '{type(group).__name__}' option `{self.name}'.")
 
         self.__group = group
-        super().__init__(param_decls, **attrs)
 
     @property
     def group(self) -> 'OptionGroup':
@@ -161,7 +162,8 @@ class OptionGroup:
         def decorator(func):
             option_attrs = attrs.copy()
             option_attrs.setdefault('cls', GroupedOption)
-            option_attrs.setdefault('hidden', self._hidden)
+            if self._hidden:
+                option_attrs.setdefault('hidden', self._hidden)
 
             if not issubclass(option_attrs['cls'], GroupedOption):
                 raise TypeError("'cls' argument must be a subclass of 'GroupedOption' class.")
@@ -260,6 +262,11 @@ class RequiredAnyOptionGroup(OptionGroup):
         if option.name in opts:
             return
 
+        if all(o.hidden for o in self.get_options(ctx).values()):
+            error_text = (f'Need at least one non-hidden option in RequiredAnyOptionGroup '
+                          f'"{self.get_default_name(ctx)}".')
+            raise TypeError(error_text)
+
         option_names = set(self.get_options(ctx))
 
         if not option_names.intersection(opts):
@@ -267,14 +274,6 @@ class RequiredAnyOptionGroup(OptionGroup):
             error_text += f'\n{self.get_error_hint(ctx)}'
 
             raise click.UsageError(error_text, ctx=ctx)
-
-    def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
-        if all(o.hidden for o in self.get_options(ctx).values()):
-            error_text = (f'Need at least one non-hidden option in RequiredAnyOptionGroup '
-                          f'"{self.get_default_name(ctx)}".')
-            raise TypeError(error_text)
-
-        return super().get_help_record(ctx)
 
 
 class RequiredAllOptionGroup(OptionGroup):
@@ -285,7 +284,7 @@ class RequiredAllOptionGroup(OptionGroup):
 
     @property
     def forbidden_option_attrs(self) -> ty.List[str]:
-        return ['required']
+        return ['required', 'hidden']
 
     @property
     def name_extra(self) -> ty.List[str]:
@@ -301,14 +300,6 @@ class RequiredAllOptionGroup(OptionGroup):
             error_text += f'\n{self.get_error_hint(ctx, required_names)}'
 
             raise click.UsageError(error_text, ctx=ctx)
-
-    def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
-        for option_name, option in self.get_options(ctx).items():
-            if option.hidden:
-                error_text = f'Hidden options ("{option_name}") are not allowed inside RequiredAllOptionGroup.'
-                raise TypeError(error_text)
-
-        return super().get_help_record(ctx)
 
 
 class MutuallyExclusiveOptionGroup(OptionGroup):

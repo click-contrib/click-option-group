@@ -409,7 +409,7 @@ def test_required_mutually_exclusive_option_group(runner):
     RequiredMutuallyExclusiveOptionGroup,
 ])
 def test_forbidden_option_attrs(cls):
-    with pytest.raises(TypeError, match=f"'required' attribute is not allowed for '{cls.__name__}' options"):
+    with pytest.raises(TypeError, match=f"'required' attribute is not allowed for '{cls.__name__}' option `foo'"):
         @click.command()
         @optgroup(cls=cls)
         @optgroup.option('--foo', required=True)
@@ -639,16 +639,14 @@ def test_hidden_option(runner):
     assert not result.exception
     assert 'foo1,bar1' in result.output
 
-    @click.command()
-    @optgroup(cls=RequiredAllOptionGroup)
-    @optgroup.option('--foo')
-    @optgroup.option('--bar', hidden=True)
-    def cli(foo, bar):
-        click.echo(f'{foo},{bar}')
-
-    result = runner.invoke(cli, ['--help'])
-    assert isinstance(result.exception, TypeError)
-    assert "not allowed" in str(result.exception)
+    with pytest.raises(
+      TypeError, match=f"'hidden' attribute is not allowed for 'RequiredAllOptionGroup' option `bar'"):
+        @click.command()
+        @optgroup(cls=RequiredAllOptionGroup)
+        @optgroup.option('--foo')
+        @optgroup.option('--bar', hidden=True)
+        def cli(foo, bar):
+            click.echo(f'{foo},{bar}')
 
     @click.command()
     @optgroup(cls=RequiredAnyOptionGroup)
@@ -657,7 +655,7 @@ def test_hidden_option(runner):
     def cli(foo, bar):
         click.echo(f'{foo},{bar}')
 
-    result = runner.invoke(cli, ['--help'])
+    result = runner.invoke(cli,)
     assert isinstance(result.exception, TypeError)
     assert "Need at least one non-hidden" in str(result.exception)
 
