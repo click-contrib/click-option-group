@@ -292,6 +292,14 @@ class RequiredAllOptionGroup(OptionGroup):
 
             raise click.UsageError(error_text, ctx=ctx)
 
+    def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
+        for option_name, option in self.get_options(ctx).items():
+            if option.hidden:
+                error_text = f'Hidden options ("{option_name}") are not allowed inside RequiredAllOptionGroup.'
+                raise click.UsageError(error_text, ctx=ctx)
+
+        return super().get_help_record(ctx)
+
 
 class MutuallyExclusiveOptionGroup(OptionGroup):
     """Option group with mutually exclusive behavior for grouped options
