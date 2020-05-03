@@ -261,8 +261,8 @@ def test_required_any_option_group(runner):
     assert result.exception
     assert result.exit_code == 2
     assert 'Missing one of the required options' in result.output
-    assert '"--foo"' in result.output
-    assert '"--bar"' in result.output
+    assert '--foo' in result.output
+    assert '--bar' in result.output
 
     result = runner.invoke(cli, ['--foo', 'foo'])
     assert not result.exception
@@ -298,22 +298,22 @@ def test_required_all_option_group(runner):
     assert result.exception
     assert result.exit_code == 2
     assert 'Missing required options from' in result.output
-    assert '"--foo"' in result.output
-    assert '"--bar"' in result.output
+    assert '--foo' in result.output
+    assert '--bar' in result.output
 
     result = runner.invoke(cli, ['--foo', 'foo'])
     assert result.exception
     assert result.exit_code == 2
     assert 'Missing required options from' in result.output
-    assert '"--foo"' not in result.output
-    assert '"--bar"' in result.output
+    assert '--foo' not in result.output
+    assert '--bar' in result.output
 
     result = runner.invoke(cli, ['--bar', 'bar'])
     assert result.exception
     assert result.exit_code == 2
     assert 'Missing required options from' in result.output
-    assert '"--foo"' in result.output
-    assert '"--bar"' not in result.output
+    assert '--foo' in result.output
+    assert '--bar' not in result.output
 
     result = runner.invoke(cli, ['--foo', 'foo', '--bar', 'bar'])
     assert not result.exception
@@ -345,22 +345,22 @@ def test_mutually_exclusive_option_group(runner):
     assert result.exception
     assert result.exit_code == 2
     assert 'The given mutually exclusive options cannot be used at the same time' in result.output
-    assert '"--foo"' in result.output
-    assert '"--bar"' in result.output
+    assert '--foo' in result.output
+    assert '--bar' in result.output
 
     result = runner.invoke(cli, ['--foo', 'foo', '--spam', 'spam'])
     assert result.exception
     assert result.exit_code == 2
     assert 'The given mutually exclusive options cannot be used at the same time' in result.output
-    assert '"--foo"' in result.output
-    assert '"--spam"' in result.output
+    assert '--foo' in result.output
+    assert '--spam' in result.output
 
     result = runner.invoke(cli, ['--bar', 'bar', '--spam', 'spam'])
     assert result.exception
     assert result.exit_code == 2
     assert 'The given mutually exclusive options cannot be used at the same time' in result.output
-    assert '"--bar"' in result.output
-    assert '"--spam"' in result.output
+    assert '--bar' in result.output
+    assert '--spam' in result.output
 
     result = runner.invoke(cli, ['--foo', 'foo'])
     assert not result.exception
@@ -397,9 +397,9 @@ def test_required_mutually_exclusive_option_group(runner):
     assert result.exception
     assert result.exit_code == 2
     assert 'Missing one of the required mutually exclusive options' in result.output
-    assert '"--foo"' in result.output
-    assert '"--bar"' in result.output
-    assert '"--spam"' in result.output
+    assert '--foo' in result.output
+    assert '--bar' in result.output
+    assert '--spam' in result.output
 
 
 @pytest.mark.parametrize('cls', [

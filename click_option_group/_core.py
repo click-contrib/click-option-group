@@ -68,7 +68,7 @@ class _GroupTitleFakeOption(click.Option):
 
     def __init__(self, param_decls=None, *, group: 'OptionGroup', **attrs):
         self.__group = group
-        super().__init__(param_decls, expose_value=False, **attrs)
+        super().__init__(param_decls, hidden=True, expose_value=False, help=group.help, **attrs)
 
     def get_help_record(self, ctx: click.Context):
         return self.__group.get_help_record(ctx)

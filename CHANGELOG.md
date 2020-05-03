@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1
+
+* Add `hidden=True` to `_GroupTitleFakeOption` as a temporary workaroud for issue [#4](https://github.com/click-contrib/click-option-group/issues/4)
+
 ## v0.3.0
 * Add support for hidden options inside groups (PR [#2](https://github.com/click-contrib/click-option-group/pull/2))
 
