@@ -1,9 +1,7 @@
 # Changelog
 
-## v0.3.2
-* DOC: update m2r from a [fork](https://github.com/crossnox/m2r) to support sphinx >= 3
-
 ## v0.3.1
+
 * Add `hidden=True` to `_GroupTitleFakeOption` as a temporary workaroud for issue [#4](https://github.com/click-contrib/click-option-group/issues/4)
 
 ## v0.3.0
