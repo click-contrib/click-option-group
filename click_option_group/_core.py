@@ -324,7 +324,7 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
         given_option_count = len(given_option_names)
 
         if given_option_count > 1:
-            error_text = f'The given mutually exclusive options cannot be used at the same time:'
+            error_text = 'The given mutually exclusive options cannot be used at the same time:'
             error_text += f'\n{self.get_error_hint(ctx, given_option_names)}'
             raise click.UsageError(error_text, ctx=ctx)
 

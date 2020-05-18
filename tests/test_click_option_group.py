@@ -642,7 +642,7 @@ def test_hidden_option(runner):
     assert 'foo1,bar1' in result.output
 
     with pytest.raises(
-      TypeError, match=f"'hidden' attribute is not allowed for 'RequiredAllOptionGroup' option `bar'"):
+      TypeError, match="'hidden' attribute is not allowed for 'RequiredAllOptionGroup' option `bar'"):
         @click.command()
         @optgroup(cls=RequiredAllOptionGroup)
         @optgroup.option('--foo')
