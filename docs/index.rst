@@ -24,6 +24,7 @@ At the same time, many Click users need this functionality.
 You can read interesting discussions about it in the following issues:
 
 * `issue 257 <https://github.com/pallets/click/issues/257>`_
+* `issue 373 <https://github.com/pallets/click/issues/373>`_
 * `issue 509 <https://github.com/pallets/click/issues/509>`_
 * `issue 1137 <https://github.com/pallets/click/issues/1137>`_
 
