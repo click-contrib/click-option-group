@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.0 (18.05.2020)
+
+* Support multi-layer wrapped functions (PR [#10](https://github.com/click-contrib/click-option-group/pull/10))
+* Fix flake8 issues
+
 ## v0.3.1
 
 * Add `hidden=True` to `_GroupTitleFakeOption` as a temporary workaroud for issue [#4](https://github.com/click-contrib/click-option-group/issues/4)
