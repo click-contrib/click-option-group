@@ -23,6 +23,7 @@ def get_callback_and_params(func) -> ty.Tuple[abc.Callable, ty.List[click.Option
     else:
         params = getattr(func, '__click_params__', [])
 
+    func = resolve_wrappers(func)
     return func, params
 
 
@@ -37,3 +38,8 @@ def raise_mixing_decorators_error(wrong_option: click.Option, callback: abc.Call
         "Grouped options must not be mixed with regular parameters while adding by decorator. "
         f"Check decorator position for {error_hint} option in '{callback.__name__}'."
     ))
+
+
+def resolve_wrappers(f):
+    """Get the underlying function behind any level of function wrappers."""
+    return resolve_wrappers(f.__wrapped__) if hasattr(f, "__wrapped__") else f

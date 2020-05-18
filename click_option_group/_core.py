@@ -12,6 +12,7 @@ from ._helpers import (
     get_callback_and_params,
     get_fake_option_name,
     raise_mixing_decorators_error,
+    resolve_wrappers
 )
 
 
@@ -182,7 +183,7 @@ class OptionGroup:
     def get_options(self, ctx: click.Context) -> ty.Dict[str, GroupedOption]:
         """Returns the dictionary with group options
         """
-        return self._options.get(ctx.command.callback, {})
+        return self._options.get(resolve_wrappers(ctx.command.callback), {})
 
     def get_option_names(self, ctx: click.Context) -> ty.List[str]:
         """Returns the list with option names ordered by addition in the group
