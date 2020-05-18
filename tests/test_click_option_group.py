@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from functools import wraps
+
 import pytest
 import click
 
@@ -695,3 +697,55 @@ def test_hidden_option(runner):
     assert "Group 1" in result.output
     assert "foo" in result.output
     assert "bar" not in result.output
+
+
+def test_wrapped_functions(runner):
+    def make_z():
+        """A unified option interface for making a `z`."""
+
+        def decorator(f):
+            @optgroup.group("Group xyz")
+            @optgroup.option("-x", type=int)
+            @optgroup.option("-y", type=int)
+            @wraps(f)
+            def new_func(*args, x=0, y=0, **kwargs):
+                # Here we handle every detail about how to make a `z` from the given options
+                f(*args, z=x + y, **kwargs)
+
+            return new_func
+
+        return decorator
+
+    def make_c():
+        """A unified option interface for making a `c`."""
+
+        def decorator(f):
+            @optgroup.group("Group abc")
+            @optgroup.option("-a", type=int)
+            @optgroup.option("-b", type=int)
+            @wraps(f)
+            def new_func(*args, a=0, b=0, **kwargs):
+                # Here we do the same, but for another object `c` (and many others to come)
+                f(*args, c=a * b, **kwargs)
+
+            return new_func
+
+        return decorator
+
+    # Here I want to create a script that has a commen UI to make a `z`.
+    # I want to reuse a common set of options for how to make a `z` and don't want
+    # to sweat the details. Also, I've decided that I also want a `c` for this script.
+    @click.command()
+    @make_z()
+    @make_c()
+    def f(z, c):
+        print(z, c)
+
+    # Test
+    result = runner.invoke(f, ["--help"])
+    assert "Group xyz" in result.output
+    assert "-x" in result.output
+    assert "-y" in result.output
+    assert "Group abc" in result.output
+    assert "-a" in result.output
+    assert "-b" in result.output
