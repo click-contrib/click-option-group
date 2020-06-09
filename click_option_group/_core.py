@@ -351,3 +351,26 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
                           f'"{self.get_default_name(ctx)}" option group:')
             error_text += f'\n{self.get_error_hint(ctx)}'
             raise click.UsageError(error_text, ctx=ctx)
+
+
+class AllOptionGroup(OptionGroup):
+    """Option group with required all/none options of this group
+
+    `AllOptionGroup` defines the behavior:
+    - All options from the group must be set or None must be set.
+    """
+
+    @property
+    def name_extra(self) -> ty.List[str]:
+        return super().name_extra + ['all_or_none']
+
+    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
+        option_names = set(self.get_options(ctx))
+
+        if not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names:
+            error_text = f'All options should be specified or None should be specified from the group '
+            error_text += f'"{self.get_default_name(ctx)}".'
+            error_text += f'\nMissing required options from "{self.get_default_name(ctx)}" option group.'
+            error_text += f'\n{self.get_error_hint(ctx)}'
+            error_text += f'\n'
+            raise click.UsageError(error_text, ctx=ctx)
