@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.0 (10.06.2020)
+
+* Add `AllOptionGroup` class: all options from the group must be set or none must be set (PR [#13](https://github.com/click-contrib/click-option-group/pull/13))
+* Fix type hints
+* Update docs
+
 ## v0.4.0 (18.05.2020)
 
 * Support multi-layer wrapped functions (PR [#10](https://github.com/click-contrib/click-option-group/pull/10))
