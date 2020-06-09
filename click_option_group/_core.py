@@ -86,7 +86,7 @@ class OptionGroup:
     """
 
     def __init__(self, name: ty.Optional[str] = None, *,
-                 hidden=False, help: ty.Optional[str] = None) -> None:
+                 hidden=False, help: ty.Optional[str] = None) -> None:  # noqa
         self._name = name if name else ''
         self._help = inspect.cleandoc(help if help else '')
         self._hidden = hidden
@@ -134,7 +134,7 @@ class OptionGroup:
         option_names = '|'.join(self.get_option_names(ctx))
         return f'({option_names})'
 
-    def get_help_record(self, ctx: click.Context) -> ty.Tuple[str, str]:
+    def get_help_record(self, ctx: click.Context) -> ty.Optional[ty.Tuple[str, str]]:
         """Returns the help record for the group
 
         :param ctx: Click Context object
