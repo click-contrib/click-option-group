@@ -361,6 +361,10 @@ class AllOptionGroup(OptionGroup):
     """
 
     @property
+    def forbidden_option_attrs(self) -> ty.List[str]:
+        return ['required', 'hidden']
+
+    @property
     def name_extra(self) -> ty.List[str]:
         return super().name_extra + ['all_or_none']
 
