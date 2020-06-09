@@ -10,6 +10,7 @@ from click_option_group import (
     OptionGroup,
     GroupedOption,
     RequiredAnyOptionGroup,
+    AllOptionGroup,
     RequiredAllOptionGroup,
     MutuallyExclusiveOptionGroup,
     RequiredMutuallyExclusiveOptionGroup,
@@ -275,6 +276,36 @@ def test_required_any_option_group(runner):
     assert not result.exception
     assert result.exit_code == 0
     assert 'None,bar' in result.output
+
+    result = runner.invoke(cli, ['--foo', 'foo', '--bar', 'bar'])
+    assert not result.exception
+    assert result.exit_code == 0
+    assert 'foo,bar' in result.output
+
+
+def test_all_option_group(runner):
+    group = AllOptionGroup()
+    assert group.name_extra == ['all_or_none']
+
+    @click.command()
+    @optgroup.group(cls=AllOptionGroup)
+    @optgroup.option('--foo')
+    @optgroup.option('--bar')
+    def cli(foo, bar):
+        click.echo(f'{foo},{bar}')
+    result = runner.invoke(cli, ['--help'])
+    assert '[all_or_none]' in result.output
+
+    result = runner.invoke(cli, [])
+    assert not result.exception
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, ['--foo', 'foo'])
+    assert result.exception
+    assert result.exit_code == 2
+    assert 'All options should be specified or None should be specified from the group' in result.output
+    assert '--foo' in result.output
+    assert '--bar' in result.output
 
     result = runner.invoke(cli, ['--foo', 'foo', '--bar', 'bar'])
     assert not result.exception

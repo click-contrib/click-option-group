@@ -79,6 +79,11 @@ API Reference
 
 ----
 
+.. autoclass:: AllOptionGroup
+    :members:
+
+----
+
 .. autoclass:: RequiredAllOptionGroup
     :members:
 
