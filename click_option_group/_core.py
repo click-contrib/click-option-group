@@ -368,9 +368,9 @@ class AllOptionGroup(OptionGroup):
         option_names = set(self.get_options(ctx))
 
         if not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names:
-            error_text = f'All options should be specified or None should be specified from the group '
-            error_text += f'"{self.get_default_name(ctx)}".'
+            error_text = f'All options should be specified or None should be specified from the group ' \
+                         f'"{self.get_default_name(ctx)}".'
             error_text += f'\nMissing required options from "{self.get_default_name(ctx)}" option group.'
             error_text += f'\n{self.get_error_hint(ctx)}'
-            error_text += f'\n'
+            error_text += '\n'
             raise click.UsageError(error_text, ctx=ctx)
