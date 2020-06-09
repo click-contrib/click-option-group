@@ -14,6 +14,7 @@ API Reference
     OptionGroup
 
     RequiredAnyOptionGroup
+    AllOptionGroup
     RequiredAllOptionGroup
     MutuallyExclusiveOptionGroup
     RequiredMutuallyExclusiveOptionGroup

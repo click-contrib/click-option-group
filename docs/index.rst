@@ -67,7 +67,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   manual
+   tutorial
    api
    changelog
 

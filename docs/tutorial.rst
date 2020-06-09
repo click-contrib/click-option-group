@@ -1,7 +1,7 @@
-.. _manual.:
+.. _tutorial:
 
-Manual
-======
+Tutorial
+========
 
 A Simple Example
 ----------------
@@ -199,8 +199,9 @@ Both these classes do not contain the specific behavior or relationship among gr
 The specific behavior can be implemented by using the inheritance, mainly, in :class:`OptionGroup` sub classes.
 **click-option-groups** provides some useful :class:`OptionGroup` based classes out of the box:
 
-- :class:`RequiredAnyOptionGroup` -- At least one option from the group must be set.
-- :class:`RequiredAllOptionGroup` --  All options from the group must be set.
+- :class:`RequiredAnyOptionGroup` -- At least one option from the group must be set
+- :class:`AllOptionGroup` --  All options from the group must be set or none must be set
+- :class:`RequiredAllOptionGroup` --  All options from the group must be set
 - :class:`MutuallyExclusiveOptionGroup` -- Only one or none option from the group must be set
 - :class:`RequiredMutuallyExclusiveOptionGroup` -- Only one required option from the group must be set
 
