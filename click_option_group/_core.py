@@ -46,7 +46,8 @@ class GroupedOption(click.Option):
 
     def handle_parse_result(self, ctx, opts, args):
         with augment_usage_errors(ctx, param=self):
-            self.group.handle_parse_result(self, ctx, opts)
+            if not ctx.resilient_parsing:
+                self.group.handle_parse_result(self, ctx, opts)
         return super().handle_parse_result(ctx, opts, args)
 
     def get_help_record(self, ctx: click.Context):
