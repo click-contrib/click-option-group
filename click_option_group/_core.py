@@ -72,6 +72,11 @@ class _GroupTitleFakeOption(click.Option):
         self.__group = group
         super().__init__(param_decls, hidden=True, expose_value=False, help=group.help, **attrs)
 
+        # We remove parsed opts for the fake options just in case.
+        # For example it is workaround for correct click-repl autocomplete
+        self.opts = []
+        self.secondary_opts = []
+
     def get_help_record(self, ctx: click.Context):
         return self.__group.get_help_record(ctx)
 
