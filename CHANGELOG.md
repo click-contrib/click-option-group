@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.1 (14.06.2020)
+
+* Fix incompatibility with autocomplete: out of the box Click completion and click-repl (Issue [#14](https://github.com/click-contrib/click-option-group/issues/14))
+
 ## v0.5.0 (10.06.2020)
 
 * Add `AllOptionGroup` class: all options from the group must be set or none must be set (PR [#13](https://github.com/click-contrib/click-option-group/pull/13))
