@@ -5,7 +5,7 @@ click-option-group
 
 Option groups missing in Click
 
-:copyright: © 2019 by Eugene Prilepin
+:copyright: © 2019-2020 by Eugene Prilepin
 :license: BSD, see LICENSE for more details.
 """
 

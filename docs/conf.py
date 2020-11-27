@@ -22,7 +22,7 @@ from click_option_group import __version__  # noqa
 # -- Project information -----------------------------------------------------
 
 project = 'click-option-group'
-copyright = '2020, Eugene Prilepin'
+copyright = '2019-2020, Eugene Prilepin'
 author = 'Eugene Prilepin'
 
 # The full version, including alpha/beta/rc tags
