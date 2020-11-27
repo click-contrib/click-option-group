@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import typing as ty
+from typing import List, Tuple
+
 import collections.abc as abc
 import random
 import string
@@ -11,7 +12,7 @@ import click
 FAKE_OPT_NAME_LEN = 30
 
 
-def get_callback_and_params(func) -> ty.Tuple[abc.Callable, ty.List[click.Option]]:
+def get_callback_and_params(func) -> Tuple[abc.Callable, List[click.Option]]:
     """Returns callback function and its parameters list
 
     :param func: decorated function or click Command

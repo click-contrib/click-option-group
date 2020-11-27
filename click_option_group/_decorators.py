@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import typing as ty
+from typing import Optional, NamedTuple, List, Tuple, Dict, Any, Type
+
 import collections.abc as abc
 import collections
 import warnings
@@ -15,9 +16,9 @@ from ._helpers import (
 )
 
 
-class OptionStackItem(ty.NamedTuple):
-    param_decls: ty.Tuple[str, ...]
-    attrs: ty.Dict[str, ty.Any]
+class OptionStackItem(NamedTuple):
+    param_decls: Tuple[str, ...]
+    attrs: Dict[str, Any]
     param_count: int
 
 
@@ -61,21 +62,24 @@ class _OptGroup:
     """
 
     def __init__(self) -> None:
-        self._decorating_state: ty.Dict[abc.Callable, ty.List[OptionStackItem]] = collections.defaultdict(list)
-        self._not_attached_options: ty.Dict[abc.Callable, ty.List[click.Option]] = collections.defaultdict(list)
+        self._decorating_state: Dict[abc.Callable, List[OptionStackItem]] = collections.defaultdict(list)
+        self._not_attached_options: Dict[abc.Callable, List[click.Option]] = collections.defaultdict(list)
         self._outer_frame_index = 1
 
-    def __call__(self, name: ty.Optional[str] = None, help: ty.Optional[str] = None,
-                 cls: ty.Optional[ty.Type[OptionGroup]] = None, **attrs):
+    def __call__(self,
+                 name: Optional[str] = None,
+                 help: Optional[str] = None,
+                 cls: Optional[Type[OptionGroup]] = None, **attrs):
         try:
             self._outer_frame_index = 2
             return self.group(name, cls=cls, help=help, **attrs)
         finally:
             self._outer_frame_index = 1
 
-    def group(self, name: ty.Optional[str] = None, *,
-              cls: ty.Optional[ty.Type[OptionGroup]] = None,
-              help: ty.Optional[str] = None, **attrs):
+    def group(self,
+              name: Optional[str] = None, *,
+              cls: Optional[Type[OptionGroup]] = None,
+              help: Optional[str] = None, **attrs):
         """The decorator creates a new group and collects its options
 
         Creates the option group and registers all grouped options

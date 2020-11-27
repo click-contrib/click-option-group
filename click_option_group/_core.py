@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import typing as ty
+from typing import Optional, List, Tuple, Dict, Set
+
 import collections
 import weakref
 import inspect
@@ -91,8 +92,8 @@ class OptionGroup:
     :param help: the group help text or None
     """
 
-    def __init__(self, name: ty.Optional[str] = None, *,
-                 hidden=False, help: ty.Optional[str] = None) -> None:  # noqa
+    def __init__(self, name: Optional[str] = None, *,
+                 hidden=False, help: Optional[str] = None) -> None:  # noqa
         self._name = name if name else ''
         self._help = inspect.cleandoc(help if help else '')
         self._hidden = hidden
@@ -117,13 +118,13 @@ class OptionGroup:
         return self._help
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         """Returns extra name attributes for the group
         """
         return []
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         """Returns the list of forbidden option attributes for the group
         """
         return []
@@ -140,7 +141,7 @@ class OptionGroup:
         option_names = '|'.join(self.get_option_names(ctx))
         return f'({option_names})'
 
-    def get_help_record(self, ctx: click.Context) -> ty.Optional[ty.Tuple[str, str]]:
+    def get_help_record(self, ctx: click.Context) -> Optional[Tuple[str, str]]:
         """Returns the help record for the group
 
         :param ctx: Click Context object
@@ -186,17 +187,17 @@ class OptionGroup:
 
         return decorator
 
-    def get_options(self, ctx: click.Context) -> ty.Dict[str, GroupedOption]:
+    def get_options(self, ctx: click.Context) -> Dict[str, GroupedOption]:
         """Returns the dictionary with group options
         """
         return self._options.get(resolve_wrappers(ctx.command.callback), {})
 
-    def get_option_names(self, ctx: click.Context) -> ty.List[str]:
+    def get_option_names(self, ctx: click.Context) -> List[str]:
         """Returns the list with option names ordered by addition in the group
         """
         return list(reversed(list(self.get_options(ctx))))
 
-    def get_error_hint(self, ctx, option_names: ty.Optional[ty.Set[str]] = None) -> str:
+    def get_error_hint(self, ctx, option_names: Optional[Set[str]] = None) -> str:
         options = self.get_options(ctx)
         text = ''
 
@@ -258,11 +259,11 @@ class RequiredAnyOptionGroup(OptionGroup):
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['required_any']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
@@ -296,11 +297,11 @@ class RequiredAllOptionGroup(OptionGroup):
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required', 'hidden']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['required_all']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
@@ -325,11 +326,11 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['mutually_exclusive']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
@@ -356,7 +357,7 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
     """
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['required']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
@@ -384,11 +385,11 @@ class AllOptionGroup(OptionGroup):
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required', 'hidden']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['all_or_none']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
