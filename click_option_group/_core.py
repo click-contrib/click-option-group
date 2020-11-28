@@ -129,18 +129,6 @@ class OptionGroup:
         """
         return []
 
-    def get_default_name(self, ctx: click.Context) -> str:
-        """Returns default name for the group
-
-        :param ctx: Click Context object
-        :return: group default name
-        """
-        if self.name:
-            return self.name
-
-        option_names = '|'.join(self.get_option_names(ctx))
-        return f'({option_names})'
-
     def get_help_record(self, ctx: click.Context) -> Optional[Tuple[str, str]]:
         """Returns the help record for the group
 
@@ -150,14 +138,20 @@ class OptionGroup:
         if all(o.hidden for o in self.get_options(ctx).values()):
             return None
 
-        name = self.get_default_name(ctx)
+        name = self.name
         help_ = self.help if self.help else ''
 
         extra = ', '.join(self.name_extra)
         if extra:
             extra = f'[{extra}]'
 
-        name = f'{name}: {extra}'
+        if name:
+            name = f'{name}: {extra}'
+        elif extra:
+            name = f'{extra}:'
+
+        if not name and not help_:
+            return None
 
         return name, help_
 
@@ -251,6 +245,9 @@ class OptionGroup:
         option = params[-1]
         self._options[func][option.name] = option
 
+    def _group_name_str(self) -> str:
+        return f"'{self.name}'" if self.name else "the"
+
 
 class RequiredAnyOptionGroup(OptionGroup):
     """Option group with required any options of this group
@@ -272,20 +269,20 @@ class RequiredAnyOptionGroup(OptionGroup):
 
         if all(o.hidden for o in self.get_options(ctx).values()):
             cls_name = self.__class__.__name__
-            group_name = self.get_default_name(ctx)
+            group_name = self._group_name_str()
 
             raise TypeError(
-                f"Need at least one non-hidden option in group '{group_name}' ('{cls_name}')."
+                f"Need at least one non-hidden option in {group_name} option group ({cls_name})."
             )
 
         option_names = set(self.get_options(ctx))
 
         if not option_names.intersection(opts):
-            group_name = self.get_default_name(ctx)
+            group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx)
 
             raise click.UsageError(
-                f"At least one of the following options from '{group_name}' group is required:\n{option_info}",
+                f"At least one of the following options from {group_name} option group is required:\n{option_info}",
                 ctx=ctx
             )
 
@@ -308,12 +305,12 @@ class RequiredAllOptionGroup(OptionGroup):
         option_names = set(self.get_options(ctx))
 
         if not option_names.issubset(opts):
-            group_name = self.get_default_name(ctx)
+            group_name = self._group_name_str()
             required_names = option_names.difference(option_names.intersection(opts))
             option_info = self.get_error_hint(ctx, required_names)
 
             raise click.UsageError(
-                f"Missing required options from '{group_name}' group:\n{option_info}",
+                f"Missing required options from {group_name} option group:\n{option_info}",
                 ctx=ctx
             )
 
@@ -339,11 +336,11 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
         given_option_count = len(given_option_names)
 
         if given_option_count > 1:
-            group_name = self.get_default_name(ctx)
+            group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx, given_option_names)
 
             raise click.UsageError(
-                f"Mutually exclusive options from '{group_name}' group "
+                f"Mutually exclusive options from {group_name} option group "
                 f"cannot be used at the same time:\n{option_info}",
                 ctx=ctx
             )
@@ -367,12 +364,12 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
         given_option_names = option_names.intersection(opts)
 
         if len(given_option_names) == 0:
-            group_name = self.get_default_name(ctx)
+            group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx)
 
             raise click.UsageError(
                 "Missing one of the required mutually exclusive options from "
-                f"'{group_name}' option group:\n{option_info}",
+                f"{group_name} option group:\n{option_info}",
                 ctx=ctx
             )
 
@@ -396,11 +393,11 @@ class AllOptionGroup(OptionGroup):
         option_names = set(self.get_options(ctx))
 
         if not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names:
-            group_name = self.get_default_name(ctx)
+            group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx)
 
             raise click.UsageError(
-                "All options should be specified or none should be specified from the group "
-                f"'{group_name}'. Missing required options:\n{option_info}",
+                f"All options from {group_name} option group should be specified or none should be specified. "
+                f"Missing required options:\n{option_info}",
                 ctx=ctx
             )
