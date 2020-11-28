@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.2 (28.11.2020)
+
+* Do not use default option group name. An empty group name will not be displayed
+* Slightly edited error messages
+* All arguments except `name` in `optgroup` decorator must be keyword-only
+
 ## v0.5.1 (14.06.2020)
 
 * Fix incompatibility with autocomplete: out of the box Click completion and click-repl (Issue [#14](https://github.com/click-contrib/click-option-group/issues/14))
