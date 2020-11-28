@@ -67,27 +67,37 @@ class _OptGroup:
         self._outer_frame_index = 1
 
     def __call__(self,
-                 name: Optional[str] = None,
+                 name: Optional[str] = None, *,
                  help: Optional[str] = None,
                  cls: Optional[Type[OptionGroup]] = None, **attrs):
+        """Creates a new group and collects its options
+
+        Creates the option group and registers all grouped options
+        which were added by `option` decorator.
+
+        :param name: Group name or None for deault name
+        :param help: Group help or None for empty help
+        :param cls: Option group class that should be inherited from `OptionGroup` class
+        :param attrs: Additional parameters of option group class
+        """
         try:
             self._outer_frame_index = 2
-            return self.group(name, cls=cls, help=help, **attrs)
+            return self.group(name, help=help, cls=cls, **attrs)
         finally:
             self._outer_frame_index = 1
 
     def group(self,
               name: Optional[str] = None, *,
-              cls: Optional[Type[OptionGroup]] = None,
-              help: Optional[str] = None, **attrs):
+              help: Optional[str] = None,
+              cls: Optional[Type[OptionGroup]] = None, **attrs):
         """The decorator creates a new group and collects its options
 
         Creates the option group and registers all grouped options
         which were added by `option` decorator.
 
         :param name: Group name or None for deault name
-        :param cls: Option group class that should be inherited from `OptionGroup` class
         :param help: Group help or None for empty help
+        :param cls: Option group class that should be inherited from `OptionGroup` class
         :param attrs: Additional parameters of option group class
         """
 
