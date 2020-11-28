@@ -47,25 +47,24 @@ def test_basic_functionality_first_api(runner):
     assert 'foo1,bar1,foo2,bar2' in result.output
 
 
-def test_default_group_name(runner):
+def test_noname_group(runner):
     @click.command()
     @optgroup()
     @optgroup.option('--foo')
-    def cli(foo, bar):
+    def cli(foo):
         pass
 
     result = runner.invoke(cli, ['--help'])
-    assert '(foo):' in result.output
+    assert 'Options:\n    --foo' in result.output
 
     @click.command()
-    @optgroup()
+    @optgroup(help='Group description')
     @optgroup.option('--foo')
-    @optgroup.option('--bar')
-    def cli(foo, bar):
+    def cli(foo):
         pass
 
     result = runner.invoke(cli, ['--help'])
-    assert '(foo|bar):' in result.output
+    assert 'Group description' in result.output
 
 
 def test_mix_decl_first_api():
@@ -263,7 +262,7 @@ def test_required_any_option_group(runner):
     result = runner.invoke(cli, [])
     assert result.exception
     assert result.exit_code == 2
-    assert 'Missing one of the required options' in result.output
+    assert 'At least one of the following options' in result.output
     assert '--foo' in result.output
     assert '--bar' in result.output
 
@@ -303,7 +302,8 @@ def test_all_option_group(runner):
     result = runner.invoke(cli, ['--foo', 'foo'])
     assert result.exception
     assert result.exit_code == 2
-    assert 'All options should be specified or None should be specified from the group' in result.output
+    assert 'All options from' in result.output
+    assert 'should be specified or none should be specified' in result.output
     assert '--foo' in result.output
     assert '--bar' in result.output
 
@@ -377,21 +377,24 @@ def test_mutually_exclusive_option_group(runner):
     result = runner.invoke(cli, ['--foo', 'foo', '--bar', 'bar'])
     assert result.exception
     assert result.exit_code == 2
-    assert 'The given mutually exclusive options cannot be used at the same time' in result.output
+    assert 'Mutually exclusive options from' in result.output
+    assert 'cannot be used at the same time' in result.output
     assert '--foo' in result.output
     assert '--bar' in result.output
 
     result = runner.invoke(cli, ['--foo', 'foo', '--spam', 'spam'])
     assert result.exception
     assert result.exit_code == 2
-    assert 'The given mutually exclusive options cannot be used at the same time' in result.output
+    assert 'Mutually exclusive options from' in result.output
+    assert 'cannot be used at the same time' in result.output
     assert '--foo' in result.output
     assert '--spam' in result.output
 
     result = runner.invoke(cli, ['--bar', 'bar', '--spam', 'spam'])
     assert result.exception
     assert result.exit_code == 2
-    assert 'The given mutually exclusive options cannot be used at the same time' in result.output
+    assert 'Mutually exclusive options from' in result.output
+    assert 'cannot be used at the same time' in result.output
     assert '--bar' in result.output
     assert '--spam' in result.output
 
@@ -562,7 +565,7 @@ def test_subcommand_second_api(runner):
 
 
 def test_group_context_second_api(runner):
-    group = OptionGroup()
+    group = OptionGroup('My Group')
 
     @click.command()
     @group.option('--foo1')
@@ -578,13 +581,13 @@ def test_group_context_second_api(runner):
 
     result = runner.invoke(cli1, ['--help'])
     assert not result.exception
-    assert '(foo1|bar1):' in result.output
+    assert 'My Group:' in result.output
     assert '--foo1' in result.output
     assert '--bar1' in result.output
 
     result = runner.invoke(cli2, ['--help'])
     assert not result.exception
-    assert '(foo2|bar2):' in result.output
+    assert 'My Group:' in result.output
     assert '--foo2' in result.output
     assert '--bar2' in result.output
 

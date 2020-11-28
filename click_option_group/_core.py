@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import typing as ty
+from typing import Optional, List, Tuple, Dict, Set
+
 import collections
 import weakref
 import inspect
@@ -91,8 +92,8 @@ class OptionGroup:
     :param help: the group help text or None
     """
 
-    def __init__(self, name: ty.Optional[str] = None, *,
-                 hidden=False, help: ty.Optional[str] = None) -> None:  # noqa
+    def __init__(self, name: Optional[str] = None, *,
+                 hidden=False, help: Optional[str] = None) -> None:  # noqa
         self._name = name if name else ''
         self._help = inspect.cleandoc(help if help else '')
         self._hidden = hidden
@@ -117,30 +118,18 @@ class OptionGroup:
         return self._help
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         """Returns extra name attributes for the group
         """
         return []
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         """Returns the list of forbidden option attributes for the group
         """
         return []
 
-    def get_default_name(self, ctx: click.Context) -> str:
-        """Returns default name for the group
-
-        :param ctx: Click Context object
-        :return: group default name
-        """
-        if self.name:
-            return self.name
-
-        option_names = '|'.join(self.get_option_names(ctx))
-        return f'({option_names})'
-
-    def get_help_record(self, ctx: click.Context) -> ty.Optional[ty.Tuple[str, str]]:
+    def get_help_record(self, ctx: click.Context) -> Optional[Tuple[str, str]]:
         """Returns the help record for the group
 
         :param ctx: Click Context object
@@ -149,14 +138,20 @@ class OptionGroup:
         if all(o.hidden for o in self.get_options(ctx).values()):
             return None
 
-        name = self.get_default_name(ctx)
+        name = self.name
         help_ = self.help if self.help else ''
 
         extra = ', '.join(self.name_extra)
         if extra:
             extra = f'[{extra}]'
 
-        name = f'{name}: {extra}'
+        if name:
+            name = f'{name}: {extra}'
+        elif extra:
+            name = f'{extra}:'
+
+        if not name and not help_:
+            return None
 
         return name, help_
 
@@ -186,17 +181,17 @@ class OptionGroup:
 
         return decorator
 
-    def get_options(self, ctx: click.Context) -> ty.Dict[str, GroupedOption]:
+    def get_options(self, ctx: click.Context) -> Dict[str, GroupedOption]:
         """Returns the dictionary with group options
         """
         return self._options.get(resolve_wrappers(ctx.command.callback), {})
 
-    def get_option_names(self, ctx: click.Context) -> ty.List[str]:
+    def get_option_names(self, ctx: click.Context) -> List[str]:
         """Returns the list with option names ordered by addition in the group
         """
         return list(reversed(list(self.get_options(ctx))))
 
-    def get_error_hint(self, ctx, option_names: ty.Optional[ty.Set[str]] = None) -> str:
+    def get_error_hint(self, ctx, option_names: Optional[Set[str]] = None) -> str:
         options = self.get_options(ctx)
         text = ''
 
@@ -250,6 +245,9 @@ class OptionGroup:
         option = params[-1]
         self._options[func][option.name] = option
 
+    def _group_name_str(self) -> str:
+        return f"'{self.name}'" if self.name else "the"
+
 
 class RequiredAnyOptionGroup(OptionGroup):
     """Option group with required any options of this group
@@ -258,11 +256,11 @@ class RequiredAnyOptionGroup(OptionGroup):
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['required_any']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
@@ -270,17 +268,23 @@ class RequiredAnyOptionGroup(OptionGroup):
             return
 
         if all(o.hidden for o in self.get_options(ctx).values()):
-            error_text = (f'Need at least one non-hidden option in RequiredAnyOptionGroup '
-                          f'"{self.get_default_name(ctx)}".')
-            raise TypeError(error_text)
+            cls_name = self.__class__.__name__
+            group_name = self._group_name_str()
+
+            raise TypeError(
+                f"Need at least one non-hidden option in {group_name} option group ({cls_name})."
+            )
 
         option_names = set(self.get_options(ctx))
 
         if not option_names.intersection(opts):
-            error_text = f'Missing one of the required options from "{self.get_default_name(ctx)}" option group:'
-            error_text += f'\n{self.get_error_hint(ctx)}'
+            group_name = self._group_name_str()
+            option_info = self.get_error_hint(ctx)
 
-            raise click.UsageError(error_text, ctx=ctx)
+            raise click.UsageError(
+                f"At least one of the following options from {group_name} option group is required:\n{option_info}",
+                ctx=ctx
+            )
 
 
 class RequiredAllOptionGroup(OptionGroup):
@@ -290,23 +294,25 @@ class RequiredAllOptionGroup(OptionGroup):
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required', 'hidden']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['required_all']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
         option_names = set(self.get_options(ctx))
 
         if not option_names.issubset(opts):
+            group_name = self._group_name_str()
             required_names = option_names.difference(option_names.intersection(opts))
+            option_info = self.get_error_hint(ctx, required_names)
 
-            error_text = f'Missing required options from "{self.get_default_name(ctx)}" option group:'
-            error_text += f'\n{self.get_error_hint(ctx, required_names)}'
-
-            raise click.UsageError(error_text, ctx=ctx)
+            raise click.UsageError(
+                f"Missing required options from {group_name} option group:\n{option_info}",
+                ctx=ctx
+            )
 
 
 class MutuallyExclusiveOptionGroup(OptionGroup):
@@ -317,11 +323,11 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['mutually_exclusive']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
@@ -330,9 +336,14 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
         given_option_count = len(given_option_names)
 
         if given_option_count > 1:
-            error_text = 'The given mutually exclusive options cannot be used at the same time:'
-            error_text += f'\n{self.get_error_hint(ctx, given_option_names)}'
-            raise click.UsageError(error_text, ctx=ctx)
+            group_name = self._group_name_str()
+            option_info = self.get_error_hint(ctx, given_option_names)
+
+            raise click.UsageError(
+                f"Mutually exclusive options from {group_name} option group "
+                f"cannot be used at the same time:\n{option_info}",
+                ctx=ctx
+            )
 
 
 class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
@@ -343,7 +354,7 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
     """
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['required']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
@@ -353,34 +364,40 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
         given_option_names = option_names.intersection(opts)
 
         if len(given_option_names) == 0:
-            error_text = ('Missing one of the required mutually exclusive options from '
-                          f'"{self.get_default_name(ctx)}" option group:')
-            error_text += f'\n{self.get_error_hint(ctx)}'
-            raise click.UsageError(error_text, ctx=ctx)
+            group_name = self._group_name_str()
+            option_info = self.get_error_hint(ctx)
+
+            raise click.UsageError(
+                "Missing one of the required mutually exclusive options from "
+                f"{group_name} option group:\n{option_info}",
+                ctx=ctx
+            )
 
 
 class AllOptionGroup(OptionGroup):
     """Option group with required all/none options of this group
 
     `AllOptionGroup` defines the behavior:
-    - All options from the group must be set or None must be set.
+        - All options from the group must be set or None must be set
     """
 
     @property
-    def forbidden_option_attrs(self) -> ty.List[str]:
+    def forbidden_option_attrs(self) -> List[str]:
         return ['required', 'hidden']
 
     @property
-    def name_extra(self) -> ty.List[str]:
+    def name_extra(self) -> List[str]:
         return super().name_extra + ['all_or_none']
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: dict) -> None:
         option_names = set(self.get_options(ctx))
 
         if not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names:
-            error_text = f'All options should be specified or None should be specified from the group ' \
-                         f'"{self.get_default_name(ctx)}".'
-            error_text += f'\nMissing required options from "{self.get_default_name(ctx)}" option group.'
-            error_text += f'\n{self.get_error_hint(ctx)}'
-            error_text += '\n'
-            raise click.UsageError(error_text, ctx=ctx)
+            group_name = self._group_name_str()
+            option_info = self.get_error_hint(ctx)
+
+            raise click.UsageError(
+                f"All options from {group_name} option group should be specified or none should be specified. "
+                f"Missing required options:\n{option_info}",
+                ctx=ctx
+            )
