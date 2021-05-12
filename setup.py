@@ -30,7 +30,7 @@ setup(
     packages=[PACKAGE_NAME],
     python_requires='>=3.6,<4',
     install_requires=[
-        'Click>=7.0,<8',
+        'Click>=7.0,<9',
     ],
     extras_require={
         'docs': ['sphinx>=2.3, <3', 'Pallets-Sphinx-Themes', 'm2r'],
