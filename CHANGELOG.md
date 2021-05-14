@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.3 (14.05.2021)
+
+* Update Click dependency version to `<9` (Issue [#33](https://github.com/click-contrib/click-option-group/issues/33))
+
 ## v0.5.2 (28.11.2020)
 
 * Do not use default option group name. An empty group name will not be displayed
