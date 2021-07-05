@@ -107,13 +107,13 @@ class _OptGroup:
             if not issubclass(cls, OptionGroup):
                 raise TypeError("'cls' must be a subclass of 'OptionGroup' class.")
 
-        frame = inspect.getouterframes(inspect.currentframe())[self._outer_frame_index]
-        lineno = frame.lineno
-
         def decorator(func):
             callback, params = get_callback_and_params(func)
 
             if callback not in self._decorating_state:
+                frame = inspect.getouterframes(inspect.currentframe())[self._outer_frame_index]
+                lineno = frame.lineno
+
                 with_name = f' "{name}"' if name else ''
                 warnings.warn((f'The empty option group{with_name} was found (line {lineno}) '
                                f'for "{callback.__name__}". The group will not be added.'),
