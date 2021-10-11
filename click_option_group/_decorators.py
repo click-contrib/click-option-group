@@ -75,7 +75,7 @@ class _OptGroup:
         Creates the option group and registers all grouped options
         which were added by `option` decorator.
 
-        :param name: Group name or None for deault name
+        :param name: Group name or None for default name
         :param help: Group help or None for empty help
         :param cls: Option group class that should be inherited from `OptionGroup` class
         :param attrs: Additional parameters of option group class
@@ -95,7 +95,7 @@ class _OptGroup:
         Creates the option group and registers all grouped options
         which were added by `option` decorator.
 
-        :param name: Group name or None for deault name
+        :param name: Group name or None for default name
         :param help: Group help or None for empty help
         :param cls: Option group class that should be inherited from `OptionGroup` class
         :param attrs: Additional parameters of option group class
