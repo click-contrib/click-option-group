@@ -28,6 +28,10 @@ setup(
     name='click-option-group',
     version=get_version(),
     packages=[PACKAGE_NAME],
+    package_data={
+        PACKAGE_NAME: ["py.typed"]
+    },
+    include_package_data=True,
     python_requires='>=3.6,<4',
     install_requires=[
         'Click>=7.0,<9',
