@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.4 (12.10.2022)
+
+* Move frame gathering into error code path (PR [#34](https://github.com/click-contrib/click-option-group/pull/34))
+* Fix typos (PR [#37](https://github.com/click-contrib/click-option-group/pull/37))
+* PEP 561 support (PR [#42](https://github.com/click-contrib/click-option-group/pull/42))
+* Update docs dependencies and Travis CI Python version matrix (PR [#43](https://github.com/click-contrib/click-option-group/pull/43))
+
 ## v0.5.3 (14.05.2021)
 
 * Update Click dependency version to `<9` (Issue [#33](https://github.com/click-contrib/click-option-group/issues/33))
