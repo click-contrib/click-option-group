@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.5 (12.10.2022)
+
+* Add `tests/` directory to tarball
+* Add `tests_cov` extra dependencies for testing with coverage
+
 ## v0.5.4 (12.10.2022)
 
 * Move frame gathering into error code path (PR [#34](https://github.com/click-contrib/click-option-group/pull/34))
