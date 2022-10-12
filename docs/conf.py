@@ -39,7 +39,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'pallets_sphinx_themes',
-    'm2r',
+    'm2r2',
 ]
 
 autodoc_member_order = 'bysource'
