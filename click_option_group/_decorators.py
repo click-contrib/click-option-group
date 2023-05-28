@@ -164,6 +164,29 @@ class _OptGroup:
 
         return decorator
 
+    def help_option(self, *param_decls, **attrs):
+        """This decorator adds a help option to the group, which prints
+        the command's help text and exits.
+        """
+        if not param_decls:
+            param_decls = ('--help',)
+
+        attrs.setdefault('is_flag', True)
+        attrs.setdefault('is_eager', True)
+        attrs.setdefault('expose_value', False)
+        attrs.setdefault('help', 'Show this message and exit.')
+
+        if 'callback' not in attrs:
+            def callback(ctx, _, value):
+                if not value or ctx.resilient_parsing:
+                    return
+                click.echo(ctx.get_help(), color=ctx.color)
+                ctx.exit()
+
+            attrs['callback'] = callback
+
+        return self.option(*param_decls, **attrs)
+
     def _add_not_attached_option(self, func, param_decls):
         click.option(
             *param_decls,
