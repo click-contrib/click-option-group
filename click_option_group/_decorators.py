@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, NamedTuple, List, Tuple, Dict, Any, Type
+from typing import Optional, NamedTuple, List, Tuple, Dict, Any, Type, TypeVar
 
-import collections.abc as abc
+from collections import abc
 import collections
 import warnings
 import inspect
@@ -14,6 +14,11 @@ from ._helpers import (
     get_callback_and_params,
     raise_mixing_decorators_error,
 )
+
+T = TypeVar('T')
+F = TypeVar('F', bound=abc.Callable)
+
+Decorator = abc.Callable[[F], F]
 
 
 class OptionStackItem(NamedTuple):
@@ -140,7 +145,7 @@ class _OptGroup:
 
         return decorator
 
-    def option(self, *param_decls, **attrs):
+    def option(self, *param_decls, **attrs) -> Decorator:
         """The decorator adds a new option to the group
 
         The decorator is lazy. It adds option decls and attrs.
@@ -164,7 +169,7 @@ class _OptGroup:
 
         return decorator
 
-    def help_option(self, *param_decls, **attrs):
+    def help_option(self, *param_decls, **attrs) -> Decorator:
         """This decorator adds a help option to the group, which prints
         the command's help text and exits.
         """
@@ -187,7 +192,7 @@ class _OptGroup:
 
         return self.option(*param_decls, **attrs)
 
-    def _add_not_attached_option(self, func, param_decls):
+    def _add_not_attached_option(self, func, param_decls) -> None:
         click.option(
             *param_decls,
             all_not_attached_options=self._not_attached_options,
@@ -198,7 +203,7 @@ class _OptGroup:
         self._not_attached_options[callback].append(params[-1])
 
     @staticmethod
-    def _filter_not_attached(options):
+    def _filter_not_attached(options: abc.Iterable[T]) -> list[T]:
         return [opt for opt in options if not isinstance(opt, _NotAttachedOption)]
 
     @staticmethod

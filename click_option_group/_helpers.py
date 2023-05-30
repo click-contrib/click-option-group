@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Tuple
+from typing import Tuple, List, TypeVar, NoReturn
+from collections import abc
 
-import collections.abc as abc
 import random
 import string
 
 import click
 
+
+F = TypeVar('F', bound=abc.Callable)
 
 FAKE_OPT_NAME_LEN = 30
 
@@ -28,11 +30,11 @@ def get_callback_and_params(func) -> Tuple[abc.Callable, List[click.Option]]:
     return func, params
 
 
-def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN, prefix: str = 'fake'):
+def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN, prefix: str = 'fake') -> str:
     return f'--{prefix}-' + ''.join(random.choices(string.ascii_lowercase, k=name_len))
 
 
-def raise_mixing_decorators_error(wrong_option: click.Option, callback: abc.Callable):
+def raise_mixing_decorators_error(wrong_option: click.Option, callback: abc.Callable) -> NoReturn:
     error_hint = wrong_option.opts or [wrong_option.name]
 
     raise TypeError((
@@ -41,6 +43,6 @@ def raise_mixing_decorators_error(wrong_option: click.Option, callback: abc.Call
     ))
 
 
-def resolve_wrappers(f):
+def resolve_wrappers(f: F) -> F:
     """Get the underlying function behind any level of function wrappers."""
     return resolve_wrappers(f.__wrapped__) if hasattr(f, "__wrapped__") else f
