@@ -33,7 +33,7 @@ jobs:
         run: pytest --color=yes --cov=click_option_group --cov-report=term
 
       - name: Coveralls
-        if: ${{ matrix.python-version == '3.11' }}
+        if: ${{ matrix.python-version == '3.8' }}
         uses: coverallsapp/github-action@v2
 
       - name: flake8 Static Analysis
