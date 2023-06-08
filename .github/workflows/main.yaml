@@ -30,11 +30,14 @@ jobs:
           python -m pip install -e .[tests_cov]
 
       - name: Unit Tests
-        run: pytest --color=yes --cov=click_option_group --cov-report=term
+        run: pytest --color=yes --cov=click_option_group --cov-report=term --cov-report=lcov:coverage.info
 
       - name: Coveralls
         if: ${{ matrix.python-version == '3.8' }}
         uses: coverallsapp/github-action@v2
+        with:
+          format: lcov
+          file: coverage.info
 
       - name: flake8 Static Analysis
         if: ${{ matrix.python-version == '3.11' }}
