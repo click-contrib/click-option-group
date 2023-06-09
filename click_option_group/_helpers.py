@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Tuple, List, TypeVar, NoReturn
-from collections import abc
+from typing import Callable, Tuple, List, TypeVar, NoReturn
 
 import random
 import string
@@ -9,12 +8,12 @@ import string
 import click
 
 
-F = TypeVar('F', bound=abc.Callable)
+F = TypeVar('F', bound=Callable)
 
 FAKE_OPT_NAME_LEN = 30
 
 
-def get_callback_and_params(func) -> Tuple[abc.Callable, List[click.Option]]:
+def get_callback_and_params(func) -> Tuple[Callable, List[click.Option]]:
     """Returns callback function and its parameters list
 
     :param func: decorated function or click Command
@@ -34,7 +33,7 @@ def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN, prefix: str = 'fake'
     return f'--{prefix}-' + ''.join(random.choices(string.ascii_lowercase, k=name_len))
 
 
-def raise_mixing_decorators_error(wrong_option: click.Option, callback: abc.Callable) -> NoReturn:
+def raise_mixing_decorators_error(wrong_option: click.Option, callback: Callable) -> NoReturn:
     error_hint = wrong_option.opts or [wrong_option.name]
 
     raise TypeError((

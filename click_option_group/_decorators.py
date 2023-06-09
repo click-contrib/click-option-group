@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, NamedTuple, List, Tuple, Dict, Any, Type, TypeVar
+from typing import (Callable, Optional, NamedTuple, List,
+                    Tuple, Dict, Iterable, Any, Type, TypeVar)
 
-from collections import abc
 import collections
 import warnings
 import inspect
@@ -16,9 +16,9 @@ from ._helpers import (
 )
 
 T = TypeVar('T')
-F = TypeVar('F', bound=abc.Callable)
+F = TypeVar('F', bound=Callable)
 
-Decorator = abc.Callable[[F], F]
+Decorator = Callable[[F], F]
 
 
 class OptionStackItem(NamedTuple):
@@ -67,8 +67,8 @@ class _OptGroup:
     """
 
     def __init__(self) -> None:
-        self._decorating_state: Dict[abc.Callable, List[OptionStackItem]] = collections.defaultdict(list)
-        self._not_attached_options: Dict[abc.Callable, List[click.Option]] = collections.defaultdict(list)
+        self._decorating_state: Dict[Callable, List[OptionStackItem]] = collections.defaultdict(list)
+        self._not_attached_options: Dict[Callable, List[click.Option]] = collections.defaultdict(list)
         self._outer_frame_index = 1
 
     def __call__(self,
@@ -203,7 +203,7 @@ class _OptGroup:
         self._not_attached_options[callback].append(params[-1])
 
     @staticmethod
-    def _filter_not_attached(options: abc.Iterable[T]) -> list[T]:
+    def _filter_not_attached(options: Iterable[T]) -> list[T]:
         return [opt for opt in options if not isinstance(opt, _NotAttachedOption)]
 
     @staticmethod
