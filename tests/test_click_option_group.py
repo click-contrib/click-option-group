@@ -733,10 +733,15 @@ def test_hidden_option(runner):
     assert "bar" not in result.output
 
 
-def test_help_option(runner):
+@pytest.mark.parametrize('param_decls, options, output', [
+    ((), ['--help'], '--help'),
+    (('-h', '--help'), ['-h'], '-h, --help'),
+    (('-h', '--help'), ['--help'], '-h, --help'),
+])
+def test_help_option(runner, param_decls, options, output):
     @click.command()
     @optgroup('Help Options')
-    @optgroup.help_option('-h', '--help')
+    @optgroup.help_option(*param_decls)
     def cli() -> None:
         click.echo('Running command.')
 
@@ -745,11 +750,11 @@ def test_help_option(runner):
     assert 'Running command.' in result.output
     assert 'Usage:' not in result.output
 
-    result = runner.invoke(cli, ['-h'])
+    result = runner.invoke(cli, options)
     assert not result.exception
     assert 'Running command.' not in result.output
     assert 'Usage:' in result.output
-    assert '-h, --help' in result.output
+    assert output in result.output
 
 
 def test_wrapped_functions(runner):

@@ -173,7 +173,7 @@ class OptionGroup:
         return name, help_
 
     def option(self, *param_decls: str, **attrs: Any) -> Callable:
-        """Decorator attaches an grouped option to the command
+        """Decorator attaches a grouped option to the command
 
         The decorator is used for adding options to the group and to the Click-command
         """
