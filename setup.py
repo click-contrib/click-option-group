@@ -37,9 +37,9 @@ setup(
         'Click>=7.0,<9',
     ],
     extras_require={
-        'docs': ['sphinx>=3.0, <6', 'Pallets-Sphinx-Themes', 'm2r2'],
+        'docs': ['sphinx', 'Pallets-Sphinx-Themes', 'm2r2'],
         'tests': ['pytest'],
-        'tests_cov': ['pytest', 'pytest-cov', 'coverage <7', 'coveralls'],
+        'tests_cov': ['pytest', 'pytest-cov', 'coverage', 'coveralls'],
     },
     url='https://github.com/click-contrib/click-option-group',
     project_urls={
