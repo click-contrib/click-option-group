@@ -733,6 +733,25 @@ def test_hidden_option(runner):
     assert "bar" not in result.output
 
 
+def test_help_option(runner):
+    @click.command()
+    @optgroup('Help Options')
+    @optgroup.help_option('-h', '--help')
+    def cli() -> None:
+        click.echo('Running command.')
+
+    result = runner.invoke(cli)
+    assert not result.exception
+    assert 'Running command.' in result.output
+    assert 'Usage:' not in result.output
+
+    result = runner.invoke(cli, ['-h'])
+    assert not result.exception
+    assert 'Running command.' not in result.output
+    assert 'Usage:' in result.output
+    assert '-h, --help' in result.output
+
+
 def test_wrapped_functions(runner):
     def make_z():
         """A unified option interface for making a `z`."""

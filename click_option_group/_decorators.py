@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, NamedTuple, List, Tuple, Dict, Any, Type
+from typing import (Callable, Optional, NamedTuple, List,
+                    Tuple, Dict, Any, Type, TypeVar)
 
-import collections.abc as abc
 import collections
 import warnings
 import inspect
@@ -14,6 +14,11 @@ from ._helpers import (
     get_callback_and_params,
     raise_mixing_decorators_error,
 )
+
+T = TypeVar('T')
+F = TypeVar('F', bound=Callable)
+
+Decorator = Callable[[F], F]
 
 
 class OptionStackItem(NamedTuple):
@@ -62,8 +67,8 @@ class _OptGroup:
     """
 
     def __init__(self) -> None:
-        self._decorating_state: Dict[abc.Callable, List[OptionStackItem]] = collections.defaultdict(list)
-        self._not_attached_options: Dict[abc.Callable, List[click.Option]] = collections.defaultdict(list)
+        self._decorating_state: Dict[Callable, List[OptionStackItem]] = collections.defaultdict(list)
+        self._not_attached_options: Dict[Callable, List[click.Option]] = collections.defaultdict(list)
         self._outer_frame_index = 1
 
     def __call__(self,
@@ -140,7 +145,7 @@ class _OptGroup:
 
         return decorator
 
-    def option(self, *param_decls, **attrs):
+    def option(self, *param_decls, **attrs) -> Decorator:
         """The decorator adds a new option to the group
 
         The decorator is lazy. It adds option decls and attrs.
@@ -164,7 +169,30 @@ class _OptGroup:
 
         return decorator
 
-    def _add_not_attached_option(self, func, param_decls):
+    def help_option(self, *param_decls, **attrs) -> Decorator:
+        """This decorator adds a help option to the group, which prints
+        the command's help text and exits.
+        """
+        if not param_decls:
+            param_decls = ('--help',)
+
+        attrs.setdefault('is_flag', True)
+        attrs.setdefault('is_eager', True)
+        attrs.setdefault('expose_value', False)
+        attrs.setdefault('help', 'Show this message and exit.')
+
+        if 'callback' not in attrs:
+            def callback(ctx, _, value):
+                if not value or ctx.resilient_parsing:
+                    return
+                click.echo(ctx.get_help(), color=ctx.color)
+                ctx.exit()
+
+            attrs['callback'] = callback
+
+        return self.option(*param_decls, **attrs)
+
+    def _add_not_attached_option(self, func, param_decls) -> None:
         click.option(
             *param_decls,
             all_not_attached_options=self._not_attached_options,
@@ -175,7 +203,7 @@ class _OptGroup:
         self._not_attached_options[callback].append(params[-1])
 
     @staticmethod
-    def _filter_not_attached(options):
+    def _filter_not_attached(options: List[T]) -> List[T]:
         return [opt for opt in options if not isinstance(opt, _NotAttachedOption)]
 
     @staticmethod
