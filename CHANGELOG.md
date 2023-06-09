@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.6 (09.06.2023)
+
+* Add `optgroup.help_option` decorator to add help option to the group (PR [#50](https://github.com/click-contrib/click-option-group/pull/50))
+* Use GitHub Actions instead of Travis CI for CI
+* Delete tox runner
+* Add Python 3.11 to the setup classifiers
+
 ## v0.5.5 (12.10.2022)
 
 * Add `tests/` directory to tarball
