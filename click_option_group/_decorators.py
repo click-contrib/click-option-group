@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import (Callable, Optional, NamedTuple, List,
-                    Tuple, Dict, Iterable, Any, Type, TypeVar)
+                    Tuple, Dict, Any, Type, TypeVar)
 
 import collections
 import warnings
@@ -203,7 +203,7 @@ class _OptGroup:
         self._not_attached_options[callback].append(params[-1])
 
     @staticmethod
-    def _filter_not_attached(options: Iterable[T]) -> list[T]:
+    def _filter_not_attached(options: List[T]) -> List[T]:
         return [opt for opt in options if not isinstance(opt, _NotAttachedOption)]
 
     @staticmethod
