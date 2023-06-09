@@ -735,6 +735,7 @@ def test_hidden_option(runner):
 
 def test_help_option(runner):
     @click.command()
+    @optgroup('Help Options')
     @optgroup.help_option('-h', '--help')
     def cli() -> None:
         click.echo('Running command.')
