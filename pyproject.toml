@@ -121,3 +121,12 @@ testpaths = ["tests"]
 
 [tool.coverage]
 run.source = ["src"]
+
+[tool.mypy]
+strict = true
+files = ["src"]
+python_version = "3.9"
+warn_unused_configs = true
+show_error_codes = true
+disallow_untyped_defs = false
+follow_imports = "normal"
