@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "click-option-group"
+authors = [
+    { name = "Eugene Prilepin", email = "esp.home@gmail.com" },
+]
+description = "Option groups missing in Click"
+readme = "README.md"
+license = 'BSD-3-Clause'
+license-files = { paths = ['LICENSE'] }
+requires-python = ">=3.6"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Environment :: Console',
+    'Topic :: Software Development :: Libraries',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+]
+
+dynamic = ["version"]
+
+dependencies = [
+    'Click>=7.0',
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+test-cov = [
+    "click-option-group[test]",
+    'pytest-cov',
+]
+dev = [
+    "click-option-group[test]",
+]
+docs = [
+    'sphinx',
+    'Pallets-Sphinx-Themes',
+    'm2r2',
+]
+
+[project.urls]
+Homepage = "https://github.com/click-contrib/click-option-group"
+Code = "https://github.com/click-contrib/click-option-group"
+Documentation = "https://click-option-group.readthedocs.io"
+Issues = "https://github.com/click-contrib/click-option-group/issues"
+
+[tool.hatch]
+version.source = "vcs"
+build.hooks.vcs.version-file = "click_option_group/_version.py"
+build.targets.wheel.packages = ['click-option-group']
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

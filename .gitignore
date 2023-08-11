@@ -75,3 +75,6 @@ dmypy.json
 
 # PyCharm
 .idea/
+
+### Project specific
+click_option_group/_version.py
