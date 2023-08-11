@@ -23,7 +23,7 @@ from ._helpers import (
     get_callback_and_params,
     get_fake_option_name,
     raise_mixing_decorators_error,
-    resolve_wrappers
+    resolve_wrappers,
 )
 
 FC = Union[Callable, click.Command]
@@ -39,18 +39,25 @@ class GroupedOption(click.Option):
     :param attrs: additional option attributes
     """
 
-    def __init__(self, param_decls: Optional[Sequence[str]] = None, *, group: 'OptionGroup', **attrs: Any):
+    def __init__(
+        self,
+        param_decls: Optional[Sequence[str]] = None,
+        *,
+        group: "OptionGroup",
+        **attrs: Any,
+    ):
         super().__init__(param_decls, **attrs)
 
         for attr in group.forbidden_option_attrs:
             if attr in attrs:
                 raise TypeError(
-                    f"'{attr}' attribute is not allowed for '{type(group).__name__}' option `{self.name}'.")
+                    f"'{attr}' attribute is not allowed for '{type(group).__name__}' option `{self.name}'."
+                )
 
         self.__group = group
 
     @property
-    def group(self) -> 'OptionGroup':
+    def group(self) -> "OptionGroup":
         """Returns the reference to the group for this option
 
         :return: `OptionGroup` the group instance for this option
@@ -58,7 +65,7 @@ class GroupedOption(click.Option):
         return self.__group
 
     def handle_parse_result(
-            self, ctx: click.Context, opts: Mapping[str, Any], args: List[str]
+        self, ctx: click.Context, opts: Mapping[str, Any], args: List[str]
     ) -> Tuple[Any, List[str]]:
         with augment_usage_errors(ctx, param=self):
             if not ctx.resilient_parsing:
@@ -75,19 +82,24 @@ class GroupedOption(click.Option):
 
         formatter = ctx.make_formatter()
         with formatter.indentation():
-            indent = ' ' * formatter.current_indent
-            return f'{indent}{opts}', opt_help
+            indent = " " * formatter.current_indent
+            return f"{indent}{opts}", opt_help
 
 
 class _GroupTitleFakeOption(click.Option):
-    """The helper `Option` class to display option group title in help
-    """
+    """The helper `Option` class to display option group title in help"""
 
     def __init__(
-        self, param_decls: Optional[Sequence[str]] = None, *, group: 'OptionGroup', **attrs: Any
+        self,
+        param_decls: Optional[Sequence[str]] = None,
+        *,
+        group: "OptionGroup",
+        **attrs: Any,
     ) -> None:
         self.__group = group
-        super().__init__(param_decls, hidden=True, expose_value=False, help=group.help, **attrs)
+        super().__init__(
+            param_decls, hidden=True, expose_value=False, help=group.help, **attrs
+        )
 
         # We remove parsed opts for the fake options just in case.
         # For example it is workaround for correct click-repl autocomplete
@@ -109,13 +121,19 @@ class OptionGroup:
     """
 
     def __init__(
-        self, name: Optional[str] = None, *, hidden: bool = False, help: Optional[str] = None
+        self,
+        name: Optional[str] = None,
+        *,
+        hidden: bool = False,
+        help: Optional[str] = None,
     ) -> None:
-        self._name = name if name else ''
-        self._help = inspect.cleandoc(help if help else '')
+        self._name = name if name else ""
+        self._help = inspect.cleandoc(help if help else "")
         self._hidden = hidden
 
-        self._options: Mapping[Any, Any] = collections.defaultdict(weakref.WeakValueDictionary)
+        self._options: Mapping[Any, Any] = collections.defaultdict(
+            weakref.WeakValueDictionary
+        )
         self._group_title_options = weakref.WeakValueDictionary()
 
     @property
@@ -136,14 +154,12 @@ class OptionGroup:
 
     @property
     def name_extra(self) -> List[str]:
-        """Returns extra name attributes for the group
-        """
+        """Returns extra name attributes for the group"""
         return []
 
     @property
     def forbidden_option_attrs(self) -> List[str]:
-        """Returns the list of forbidden option attributes for the group
-        """
+        """Returns the list of forbidden option attributes for the group"""
         return []
 
     def get_help_record(self, ctx: click.Context) -> Optional[Tuple[str, str]]:
@@ -156,16 +172,16 @@ class OptionGroup:
             return None
 
         name = self.name
-        help_ = self.help if self.help else ''
+        help_ = self.help if self.help else ""
 
-        extra = ', '.join(self.name_extra)
+        extra = ", ".join(self.name_extra)
         if extra:
-            extra = f'[{extra}]'
+            extra = f"[{extra}]"
 
         if name:
-            name = f'{name}: {extra}'
+            name = f"{name}: {extra}"
         elif extra:
-            name = f'{extra}:'
+            name = f"{extra}:"
 
         if not name and not help_:
             return None
@@ -180,12 +196,14 @@ class OptionGroup:
 
         def decorator(func: FC) -> FC:
             option_attrs = attrs.copy()
-            option_attrs.setdefault('cls', GroupedOption)
+            option_attrs.setdefault("cls", GroupedOption)
             if self._hidden:
-                option_attrs.setdefault('hidden', self._hidden)
+                option_attrs.setdefault("hidden", self._hidden)
 
-            if not issubclass(option_attrs['cls'], GroupedOption):
-                raise TypeError("'cls' argument must be a subclass of 'GroupedOption' class.")
+            if not issubclass(option_attrs["cls"], GroupedOption):
+                raise TypeError(
+                    "'cls' argument must be a subclass of 'GroupedOption' class."
+                )
 
             self._check_mixing_decorators(func)
             func = click.option(*param_decls, group=self, **option_attrs)(func)
@@ -199,32 +217,33 @@ class OptionGroup:
         return decorator
 
     def get_options(self, ctx: click.Context) -> Dict[str, GroupedOption]:
-        """Returns the dictionary with group options
-        """
+        """Returns the dictionary with group options"""
         return self._options.get(resolve_wrappers(ctx.command.callback), {})
 
     def get_option_names(self, ctx: click.Context) -> List[str]:
-        """Returns the list with option names ordered by addition in the group
-        """
+        """Returns the list with option names ordered by addition in the group"""
         return list(reversed(list(self.get_options(ctx))))
 
-    def get_error_hint(self, ctx: click.Context, option_names: Optional[Set[str]] = None) -> str:
+    def get_error_hint(
+        self, ctx: click.Context, option_names: Optional[Set[str]] = None
+    ) -> str:
         options = self.get_options(ctx)
-        text = ''
+        text = ""
 
         for name, opt in reversed(list(options.items())):
             if option_names and name not in option_names:
                 continue
-            text += f'  {opt.get_error_hint(ctx)}\n'
+            text += f"  {opt.get_error_hint(ctx)}\n"
 
         if text:
             text = text[:-1]
 
         return text
 
-    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
-        """The method should be used for adding specific behavior and relation for options in the group
-        """
+    def handle_parse_result(
+        self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]
+    ) -> None:
+        """The method should be used for adding specific behavior and relation for options in the group"""
 
     def _check_mixing_decorators(self, func: Callable) -> None:
         func, params = get_callback_and_params(func)
@@ -243,8 +262,9 @@ class OptionGroup:
         callback, params = get_callback_and_params(func)
 
         if callback not in self._group_title_options:
-            func = click.option(get_fake_option_name(),
-                                group=self, cls=_GroupTitleFakeOption)(func)
+            func = click.option(
+                get_fake_option_name(), group=self, cls=_GroupTitleFakeOption
+            )(func)
 
             _, params = get_callback_and_params(func)
             self._group_title_options[callback] = params[-1]
@@ -274,13 +294,15 @@ class RequiredAnyOptionGroup(OptionGroup):
 
     @property
     def forbidden_option_attrs(self) -> List[str]:
-        return ['required']
+        return ["required"]
 
     @property
     def name_extra(self) -> List[str]:
-        return super().name_extra + ['required_any']
+        return super().name_extra + ["required_any"]
 
-    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
+    def handle_parse_result(
+        self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]
+    ) -> None:
         if option.name in opts:
             return
 
@@ -300,7 +322,7 @@ class RequiredAnyOptionGroup(OptionGroup):
 
             raise click.UsageError(
                 f"At least one of the following options from {group_name} option group is required:\n{option_info}",
-                ctx=ctx
+                ctx=ctx,
             )
 
 
@@ -312,13 +334,15 @@ class RequiredAllOptionGroup(OptionGroup):
 
     @property
     def forbidden_option_attrs(self) -> List[str]:
-        return ['required', 'hidden']
+        return ["required", "hidden"]
 
     @property
     def name_extra(self) -> List[str]:
-        return super().name_extra + ['required_all']
+        return super().name_extra + ["required_all"]
 
-    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
+    def handle_parse_result(
+        self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]
+    ) -> None:
         option_names = set(self.get_options(ctx))
 
         if not option_names.issubset(opts):
@@ -328,7 +352,7 @@ class RequiredAllOptionGroup(OptionGroup):
 
             raise click.UsageError(
                 f"Missing required options from {group_name} option group:\n{option_info}",
-                ctx=ctx
+                ctx=ctx,
             )
 
 
@@ -341,13 +365,15 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
 
     @property
     def forbidden_option_attrs(self) -> List[str]:
-        return ['required']
+        return ["required"]
 
     @property
     def name_extra(self) -> List[str]:
-        return super().name_extra + ['mutually_exclusive']
+        return super().name_extra + ["mutually_exclusive"]
 
-    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
+    def handle_parse_result(
+        self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]
+    ) -> None:
         option_names = set(self.get_options(ctx))
         given_option_names = option_names.intersection(opts)
         given_option_count = len(given_option_names)
@@ -359,7 +385,7 @@ class MutuallyExclusiveOptionGroup(OptionGroup):
             raise click.UsageError(
                 f"Mutually exclusive options from {group_name} option group "
                 f"cannot be used at the same time:\n{option_info}",
-                ctx=ctx
+                ctx=ctx,
             )
 
 
@@ -372,9 +398,11 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
 
     @property
     def name_extra(self) -> List[str]:
-        return super().name_extra + ['required']
+        return super().name_extra + ["required"]
 
-    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
+    def handle_parse_result(
+        self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]
+    ) -> None:
         super().handle_parse_result(option, ctx, opts)
 
         option_names = set(self.get_option_names(ctx))
@@ -387,7 +415,7 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
             raise click.UsageError(
                 "Missing one of the required mutually exclusive options from "
                 f"{group_name} option group:\n{option_info}",
-                ctx=ctx
+                ctx=ctx,
             )
 
 
@@ -400,21 +428,26 @@ class AllOptionGroup(OptionGroup):
 
     @property
     def forbidden_option_attrs(self) -> List[str]:
-        return ['required', 'hidden']
+        return ["required", "hidden"]
 
     @property
     def name_extra(self) -> List[str]:
-        return super().name_extra + ['all_or_none']
+        return super().name_extra + ["all_or_none"]
 
-    def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
+    def handle_parse_result(
+        self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]
+    ) -> None:
         option_names = set(self.get_options(ctx))
 
-        if not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names:
+        if (
+            not option_names.isdisjoint(opts)
+            and option_names.intersection(opts) != option_names
+        ):
             group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx)
 
             raise click.UsageError(
                 f"All options from {group_name} option group should be specified or none should be specified. "
                 f"Missing required options:\n{option_info}",
-                ctx=ctx
+                ctx=ctx,
             )

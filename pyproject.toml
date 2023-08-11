@@ -62,9 +62,11 @@ Issues = "https://github.com/click-contrib/click-option-group/issues"
 
 [tool.hatch]
 version.source = "vcs"
-build.hooks.vcs.version-file = "click_option_group/_version.py"
-build.targets.wheel.packages = ['click-option-group']
+build.hooks.vcs.version-file = "src/click_option_group/_version.py"
 
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage]
+run.source = ["src"]

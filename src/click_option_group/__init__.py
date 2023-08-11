@@ -25,13 +25,13 @@ from ._decorators import optgroup
 
 
 __all__ = [
-    '__version__',
-    'optgroup',
-    'GroupedOption',
-    'OptionGroup',
-    'RequiredAnyOptionGroup',
-    'AllOptionGroup',
-    'RequiredAllOptionGroup',
-    'MutuallyExclusiveOptionGroup',
-    'RequiredMutuallyExclusiveOptionGroup',
+    "__version__",
+    "optgroup",
+    "GroupedOption",
+    "OptionGroup",
+    "RequiredAnyOptionGroup",
+    "AllOptionGroup",
+    "RequiredAllOptionGroup",
+    "MutuallyExclusiveOptionGroup",
+    "RequiredMutuallyExclusiveOptionGroup",
 ]

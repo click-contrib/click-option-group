@@ -77,4 +77,4 @@ dmypy.json
 .idea/
 
 ### Project specific
-click_option_group/_version.py
+src/click_option_group/_version.py
