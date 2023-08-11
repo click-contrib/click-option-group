@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from typing import Callable, Optional, NamedTuple, List, Tuple, Dict, Any, Type, TypeVar
-
 import collections
-import warnings
 import inspect
+import warnings
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Type, TypeVar
 
 import click
 
@@ -33,9 +30,7 @@ class _NotAttachedOption(click.Option):
     """
 
     def __init__(self, param_decls=None, *, all_not_attached_options, **attrs):
-        super().__init__(
-            param_decls, expose_value=False, hidden=False, is_eager=True, **attrs
-        )
+        super().__init__(param_decls, expose_value=False, hidden=False, is_eager=True, **attrs)
         self._all_not_attached_options = all_not_attached_options
 
     def handle_parse_result(self, ctx, opts, args):
@@ -44,12 +39,8 @@ class _NotAttachedOption(click.Option):
             options_error_hint += f"  {option.get_error_hint(ctx)}\n"
         options_error_hint = options_error_hint[:-1]
 
-        raise TypeError(
-            (
-                f"Missing option group decorator in '{ctx.command.name}' command for the following grouped options:\n"
-                f"{options_error_hint}\n"
-            )
-        )
+        msg = f"Missing option group decorator in '{ctx.command.name}' command for the following grouped options:\n{options_error_hint}\n"
+        raise TypeError(msg)
 
 
 class _OptGroup:
@@ -71,12 +62,8 @@ class _OptGroup:
     """
 
     def __init__(self) -> None:
-        self._decorating_state: Dict[
-            Callable, List[OptionStackItem]
-        ] = collections.defaultdict(list)
-        self._not_attached_options: Dict[
-            Callable, List[click.Option]
-        ] = collections.defaultdict(list)
+        self._decorating_state: Dict[Callable, List[OptionStackItem]] = collections.defaultdict(list)
+        self._not_attached_options: Dict[Callable, List[click.Option]] = collections.defaultdict(list)
         self._outer_frame_index = 1
 
     def __call__(
@@ -126,15 +113,14 @@ class _OptGroup:
             cls = OptionGroup
         else:
             if not issubclass(cls, OptionGroup):
-                raise TypeError("'cls' must be a subclass of 'OptionGroup' class.")
+                msg = "'cls' must be a subclass of 'OptionGroup' class."
+                raise TypeError(msg)
 
         def decorator(func):
             callback, params = get_callback_and_params(func)
 
             if callback not in self._decorating_state:
-                frame = inspect.getouterframes(inspect.currentframe())[
-                    self._outer_frame_index
-                ]
+                frame = inspect.getouterframes(inspect.currentframe())[self._outer_frame_index]
                 lineno = frame.lineno
 
                 with_name = f' "{name}"' if name else ""
@@ -151,18 +137,14 @@ class _OptGroup:
             option_stack = self._decorating_state.pop(callback)
 
             [params.remove(opt) for opt in self._not_attached_options.pop(callback)]
-            self._check_mixing_decorators(
-                callback, option_stack, self._filter_not_attached(params)
-            )
+            self._check_mixing_decorators(callback, option_stack, self._filter_not_attached(params))
 
             attrs["help"] = help
 
             try:
                 option_group = cls(name, **attrs)
             except TypeError as err:
-                message = str(err).replace(
-                    "__init__()", f"'{cls.__name__}' constructor"
-                )
+                message = str(err).replace("__init__()", f"'{cls.__name__}' constructor")
                 raise TypeError(message) from err
 
             for item in option_stack:
@@ -201,7 +183,7 @@ class _OptGroup:
         the command's help text and exits.
         """
         if not param_decls:
-            param_decls = ("--help",)
+            param_decls = ("--help", )
 
         attrs.setdefault("is_flag", True)
         attrs.setdefault("is_eager", True)

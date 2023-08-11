@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 click-option-group
 ~~~~~~~~~~~~~~~~~~
@@ -9,20 +8,17 @@ Option groups missing in Click
 :license: BSD, see LICENSE for more details.
 """
 
-from ._version import __version__
-
 from ._core import (
-    GroupedOption,
-    OptionGroup,
-    RequiredAnyOptionGroup,
     AllOptionGroup,
-    RequiredAllOptionGroup,
+    GroupedOption,
     MutuallyExclusiveOptionGroup,
+    OptionGroup,
+    RequiredAllOptionGroup,
+    RequiredAnyOptionGroup,
     RequiredMutuallyExclusiveOptionGroup,
 )
-
 from ._decorators import optgroup
-
+from ._version import __version__
 
 __all__ = [
     "__version__",

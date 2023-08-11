@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from typing import Callable, Tuple, List, TypeVar, NoReturn
-
 import random
 import string
+from typing import Callable, List, NoReturn, Tuple, TypeVar
 
 import click
-
 
 F = TypeVar("F", bound=Callable)
 
@@ -29,23 +25,15 @@ def get_callback_and_params(func) -> Tuple[Callable, List[click.Option]]:
     return func, params
 
 
-def get_fake_option_name(
-    name_len: int = FAKE_OPT_NAME_LEN, prefix: str = "fake"
-) -> str:
+def get_fake_option_name(name_len: int = FAKE_OPT_NAME_LEN, prefix: str = "fake") -> str:
     return f"--{prefix}-" + "".join(random.choices(string.ascii_lowercase, k=name_len))
 
 
-def raise_mixing_decorators_error(
-    wrong_option: click.Option, callback: Callable
-) -> NoReturn:
+def raise_mixing_decorators_error(wrong_option: click.Option, callback: Callable) -> NoReturn:
     error_hint = wrong_option.opts or [wrong_option.name]
 
-    raise TypeError(
-        (
-            "Grouped options must not be mixed with regular parameters while adding by decorator. "
-            f"Check decorator position for {error_hint} option in '{callback.__name__}'."
-        )
-    )
+    msg = f"Grouped options must not be mixed with regular parameters while adding by decorator. Check decorator position for {error_hint} option in '{callback.__name__}'."
+    raise TypeError(msg)
 
 
 def resolve_wrappers(f: F) -> F:
