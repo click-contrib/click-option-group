@@ -1,0 +1,9 @@
+# Common test variables
+tag:
+  - smoke
+tier: 0
+path: /
+
+# Define tests
+/version:
+  test: python3 -c "import click_option_group; print(click_option_group.__version__)"

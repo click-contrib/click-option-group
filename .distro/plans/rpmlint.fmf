@@ -1,0 +1,14 @@
+summary:
+  Perform rpmlint and rpminspect tests
+prepare:
+  - name: Install rpmlint packages
+    how: install
+    package:
+    - rpmlint
+    - rpminspect
+    - rpminspect-data-fedora
+discover+:
+  how: fmf
+  filter: "tag: rpmlint"
+execute:
+    how: tmt
