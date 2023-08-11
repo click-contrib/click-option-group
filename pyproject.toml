@@ -46,6 +46,7 @@ test-cov = [
 ]
 dev = [
     "click-option-group[test]",
+    "pre-commit",
 ]
 docs = [
     'sphinx',
