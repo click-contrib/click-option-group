@@ -64,6 +64,40 @@ Issues = "https://github.com/click-contrib/click-option-group/issues"
 version.source = "vcs"
 build.hooks.vcs.version-file = "src/click_option_group/_version.py"
 
+[tool.ruff]
+line-length = 120
+select = [
+    "E", "F", "W", # flake8
+    "B",           # flake8-bugbear
+    "I",           # isort
+    "C4",          # flake8-comprehensions
+    "EM",          # flake8-errmsg
+    "ICN",         # flake8-import-conventions
+    "ISC",         # flake8-implicit-str-concat
+    "PGH",         # pygrep-hooks
+    "PIE",         # flake8-pie
+    "PL",          # pylint
+    "PT",          # flake8-pytest-style
+    "PTH",         # flake8-use-pathlib
+    "RET",         # flake8-return
+    "RUF",         # Ruff-specific
+    "SIM",         # flake8-simplify
+    "TID251",      # flake8-tidy-imports.banned-api
+    "T20",         # flake8-print
+    "UP",          # pyupgrade
+    "YTT",         # flake8-2020
+]
+extend-ignore = [
+    "PLR",     # Design rules for pylint
+    "PLE1205", # Format check doesn't work with our custom logger
+    "E501",    # Line too long
+    "PT004",   # Incorrect, just usefixtures instead.
+    "PT012",   # Block should contain a single simple statement
+    "RUF009",  # Too easy to get a false positive
+]
+src = ["src"]
+unfixable = ["T20", "F841"]
+exclude = []
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
