@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from typing import (Callable, Optional, NamedTuple, List,
-                    Tuple, Dict, Any, Type, TypeVar)
-
 import collections
-import warnings
 import inspect
+import warnings
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Type, TypeVar
 
 import click
 
@@ -15,8 +11,8 @@ from ._helpers import (
     raise_mixing_decorators_error,
 )
 
-T = TypeVar('T')
-F = TypeVar('F', bound=Callable)
+T = TypeVar("T")
+F = TypeVar("F", bound=Callable)
 
 Decorator = Callable[[F], F]
 
@@ -38,14 +34,13 @@ class _NotAttachedOption(click.Option):
         self._all_not_attached_options = all_not_attached_options
 
     def handle_parse_result(self, ctx, opts, args):
-        options_error_hint = ''
+        options_error_hint = ""
         for option in reversed(self._all_not_attached_options[ctx.command.callback]):
-            options_error_hint += f'  {option.get_error_hint(ctx)}\n'
+            options_error_hint += f"  {option.get_error_hint(ctx)}\n"
         options_error_hint = options_error_hint[:-1]
 
-        raise TypeError((
-            f"Missing option group decorator in '{ctx.command.name}' command for the following grouped options:\n"
-            f"{options_error_hint}\n"))
+        msg = f"Missing option group decorator in '{ctx.command.name}' command for the following grouped options:\n{options_error_hint}\n"
+        raise TypeError(msg)
 
 
 class _OptGroup:
@@ -71,10 +66,14 @@ class _OptGroup:
         self._not_attached_options: Dict[Callable, List[click.Option]] = collections.defaultdict(list)
         self._outer_frame_index = 1
 
-    def __call__(self,
-                 name: Optional[str] = None, *,
-                 help: Optional[str] = None,
-                 cls: Optional[Type[OptionGroup]] = None, **attrs):
+    def __call__(
+        self,
+        name: Optional[str] = None,
+        *,
+        help: Optional[str] = None,
+        cls: Optional[Type[OptionGroup]] = None,
+        **attrs,
+    ):
         """Creates a new group and collects its options
 
         Creates the option group and registers all grouped options
@@ -91,10 +90,14 @@ class _OptGroup:
         finally:
             self._outer_frame_index = 1
 
-    def group(self,
-              name: Optional[str] = None, *,
-              help: Optional[str] = None,
-              cls: Optional[Type[OptionGroup]] = None, **attrs):
+    def group(
+        self,
+        name: Optional[str] = None,
+        *,
+        help: Optional[str] = None,
+        cls: Optional[Type[OptionGroup]] = None,
+        **attrs,
+    ):
         """The decorator creates a new group and collects its options
 
         Creates the option group and registers all grouped options
@@ -110,7 +113,8 @@ class _OptGroup:
             cls = OptionGroup
         else:
             if not issubclass(cls, OptionGroup):
-                raise TypeError("'cls' must be a subclass of 'OptionGroup' class.")
+                msg = "'cls' must be a subclass of 'OptionGroup' class."
+                raise TypeError(msg)
 
         def decorator(func):
             callback, params = get_callback_and_params(func)
@@ -119,10 +123,15 @@ class _OptGroup:
                 frame = inspect.getouterframes(inspect.currentframe())[self._outer_frame_index]
                 lineno = frame.lineno
 
-                with_name = f' "{name}"' if name else ''
-                warnings.warn((f'The empty option group{with_name} was found (line {lineno}) '
-                               f'for "{callback.__name__}". The group will not be added.'),
-                              RuntimeWarning, stacklevel=2)
+                with_name = f' "{name}"' if name else ""
+                warnings.warn(
+                    (
+                        f"The empty option group{with_name} was found (line {lineno}) "
+                        f'for "{callback.__name__}". The group will not be added.'
+                    ),
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
                 return func
 
             option_stack = self._decorating_state.pop(callback)
@@ -130,12 +139,12 @@ class _OptGroup:
             [params.remove(opt) for opt in self._not_attached_options.pop(callback)]
             self._check_mixing_decorators(callback, option_stack, self._filter_not_attached(params))
 
-            attrs['help'] = help
+            attrs["help"] = help
 
             try:
                 option_group = cls(name, **attrs)
             except TypeError as err:
-                message = str(err).replace('__init__()', f"'{cls.__name__}' constructor")
+                message = str(err).replace("__init__()", f"'{cls.__name__}' constructor")
                 raise TypeError(message) from err
 
             for item in option_stack:
@@ -174,21 +183,22 @@ class _OptGroup:
         the command's help text and exits.
         """
         if not param_decls:
-            param_decls = ('--help',)
+            param_decls = ("--help", )
 
-        attrs.setdefault('is_flag', True)
-        attrs.setdefault('is_eager', True)
-        attrs.setdefault('expose_value', False)
-        attrs.setdefault('help', 'Show this message and exit.')
+        attrs.setdefault("is_flag", True)
+        attrs.setdefault("is_eager", True)
+        attrs.setdefault("expose_value", False)
+        attrs.setdefault("help", "Show this message and exit.")
 
-        if 'callback' not in attrs:
+        if "callback" not in attrs:
+
             def callback(ctx, _, value):
                 if not value or ctx.resilient_parsing:
                     return
                 click.echo(ctx.get_help(), color=ctx.color)
                 ctx.exit()
 
-            attrs['callback'] = callback
+            attrs["callback"] = callback
 
         return self.option(*param_decls, **attrs)
 
@@ -196,7 +206,7 @@ class _OptGroup:
         click.option(
             *param_decls,
             all_not_attached_options=self._not_attached_options,
-            cls=_NotAttachedOption
+            cls=_NotAttachedOption,
         )(func)
 
         callback, params = get_callback_and_params(func)

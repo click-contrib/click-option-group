@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
+import pytest
 from click.testing import CliRunner
 
-import pytest
 
-
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def runner():
     return CliRunner()

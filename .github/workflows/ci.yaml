@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload-wheel:
+        type: boolean
+        required: false
+        default: false
+        description: Upload wheel as an artifact
+  pull_request:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    uses: ./.github/workflows/step_test.yaml
+
+  build-wheel:
+    uses: ./.github/workflows/step_build-wheel.yaml
+    needs: [ tests ]
+    with:
+      upload: ${{ inputs.upload-wheel || false }}
