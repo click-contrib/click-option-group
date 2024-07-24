@@ -746,7 +746,9 @@ def test_hidden_option(runner):
     def cli(foo, bar):
         click.echo(f"{foo},{bar}")
 
-    result = runner.invoke(cli, )
+    result = runner.invoke(
+        cli,
+    )
     assert isinstance(result.exception, TypeError)
     assert "Need at least one non-hidden" in str(result.exception)
 
