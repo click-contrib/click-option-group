@@ -11,7 +11,7 @@ description = "Option groups missing in Click"
 readme = "README.md"
 license = 'BSD-3-Clause'
 license-files = { paths = ['LICENSE'] }
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 classifiers = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -22,12 +22,12 @@ classifiers = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
 ]
 
 dynamic = ["version"]
