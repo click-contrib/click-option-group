@@ -111,7 +111,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, ["--help"])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exc_info[0], TypeError)
     assert "Missing option group decorator" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
@@ -119,7 +119,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, [])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exc_info[0], TypeError)
     assert "Missing option group" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
@@ -127,7 +127,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, ["--hello1", "hello1"])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exc_info[0], TypeError)
     assert "Missing option group" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
@@ -135,7 +135,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, ["--foo", "foo"])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exc_info[0], TypeError)
     assert "Missing option group" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
