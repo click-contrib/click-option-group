@@ -44,8 +44,8 @@ jobs:
     name: Create release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: softprops/action-gh-release@v1
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
         with:
           name: click-option-group ${{ github.ref_name }}
           prerelease: ${{ contains(github.ref, 'rc') }}
