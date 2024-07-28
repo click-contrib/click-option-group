@@ -61,8 +61,12 @@ class GroupedOption(click.Option):
         """
         return self.__group
 
-    def handle_parse_result(self, ctx: click.Context, opts: Mapping[str, Any],
-                            args: List[str]) -> Tuple[Any, List[str]]:
+    def handle_parse_result(
+        self,
+        ctx: click.Context,
+        opts: Mapping[str, Any],
+        args: List[str],
+    ) -> Tuple[Any, List[str]]:
         with augment_usage_errors(ctx, param=self):
             if not ctx.resilient_parsing:
                 self.group.handle_parse_result(self, ctx, opts)
@@ -390,7 +394,9 @@ class RequiredMutuallyExclusiveOptionGroup(MutuallyExclusiveOptionGroup):
             group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx)
 
-            msg = f"Missing one of the required mutually exclusive options from {group_name} option group:\n{option_info}"
+            msg = (
+                f"Missing one of the required mutually exclusive options from {group_name} option group:\n{option_info}"
+            )
             raise click.UsageError(
                 msg,
                 ctx=ctx,
@@ -415,7 +421,7 @@ class AllOptionGroup(OptionGroup):
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
         option_names = set(self.get_options(ctx))
 
-        if (not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names):
+        if not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names:
             group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx)
 

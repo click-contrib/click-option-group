@@ -13,7 +13,10 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.284
+    rev: v0.5.5
     hooks:
       - id: ruff
+        name: ruff lint
         args: ["--fix", "--show-fixes"]
+      - id: ruff-format
+        name: ruff format

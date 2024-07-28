@@ -16,7 +16,6 @@ from click_option_group import (
 
 
 def test_basic_functionality_first_api(runner):
-
     @click.command()
     @click.option("--hello")
     @optgroup("Group 1", help="Group 1 description")
@@ -45,7 +44,6 @@ def test_basic_functionality_first_api(runner):
 
 
 def test_noname_group(runner):
-
     @click.command()
     @optgroup()
     @optgroup.option("--foo")
@@ -99,7 +97,6 @@ def test_mix_decl_first_api():
 
 
 def test_missing_group_decl_first_api(runner):
-
     @click.command()
     @click.option("--hello1")
     @optgroup.option("--foo")
@@ -111,7 +108,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, ["--help"])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exception, TypeError)
     assert "Missing option group decorator" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
@@ -119,7 +116,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, [])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exception, TypeError)
     assert "Missing option group" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
@@ -127,7 +124,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, ["--hello1", "hello1"])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exception, TypeError)
     assert "Missing option group" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
@@ -135,7 +132,7 @@ def test_missing_group_decl_first_api(runner):
     result = runner.invoke(cli, ["--foo", "foo"])
 
     assert result.exception
-    assert TypeError == result.exc_info[0]
+    assert isinstance(result.exception, TypeError)
     assert "Missing option group" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
@@ -184,7 +181,6 @@ def test_option_group_unexpected_arguments():
 
 
 def test_incorrect_grouped_option_cls():
-
     @click.command()
     @optgroup()
     @optgroup.option("--foo", cls=GroupedOption)
@@ -472,7 +468,6 @@ def test_forbidden_option_attrs(cls):
 
 
 def test_subcommand_first_api(runner):
-
     @click.group()
     @optgroup("Group 1", help="Group 1 description")
     @optgroup.option("--foo")
@@ -677,7 +672,6 @@ def test_subcommand_mix_decl_second_api():
 
 
 def test_command_first_api(runner):
-
     @optgroup("Group 1")
     @optgroup.option("--foo")
     @optgroup.option("--bar")
@@ -697,7 +691,6 @@ def test_command_first_api(runner):
 
 
 def test_hidden_option(runner):
-
     @click.command()
     @click.option("--hello")
     @optgroup("Group 1", help="Group 1 description")
@@ -746,7 +739,9 @@ def test_hidden_option(runner):
     def cli(foo, bar):
         click.echo(f"{foo},{bar}")
 
-    result = runner.invoke(cli, )
+    result = runner.invoke(
+        cli,
+    )
     assert isinstance(result.exception, TypeError)
     assert "Need at least one non-hidden" in str(result.exception)
 
@@ -797,7 +792,6 @@ def test_hidden_option(runner):
     ],
 )
 def test_help_option(runner, param_decls, options, output):
-
     @click.command()
     @optgroup("Help Options")
     @optgroup.help_option(*param_decls)
@@ -817,12 +811,10 @@ def test_help_option(runner, param_decls, options, output):
 
 
 def test_wrapped_functions(runner):
-
     def make_z():
         """A unified option interface for making a `z`."""
 
         def decorator(f):
-
             @optgroup.group("Group xyz")
             @optgroup.option("-x", type=int)
             @optgroup.option("-y", type=int)
@@ -839,7 +831,6 @@ def test_wrapped_functions(runner):
         """A unified option interface for making a `c`."""
 
         def decorator(f):
-
             @optgroup.group("Group abc")
             @optgroup.option("-a", type=int)
             @optgroup.option("-b", type=int)
