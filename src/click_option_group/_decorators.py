@@ -111,10 +111,9 @@ class _OptGroup:
 
         if not cls:
             cls = OptionGroup
-        else:
-            if not issubclass(cls, OptionGroup):
-                msg = "'cls' must be a subclass of 'OptionGroup' class."
-                raise TypeError(msg)
+        elif not issubclass(cls, OptionGroup):
+            msg = "'cls' must be a subclass of 'OptionGroup' class."
+            raise TypeError(msg)
 
         def decorator(func):
             callback, params = get_callback_and_params(func)
@@ -183,7 +182,7 @@ class _OptGroup:
         the command's help text and exits.
         """
         if not param_decls:
-            param_decls = ("--help", )
+            param_decls = ("--help",)
 
         attrs.setdefault("is_flag", True)
         attrs.setdefault("is_eager", True)

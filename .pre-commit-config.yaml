@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -12,13 +12,11 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
 
-  - repo: https://github.com/google/yapf
-    rev: v0.40.1
-    hooks:
-      - id: yapf
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.284
+    rev: v0.5.5
     hooks:
       - id: ruff
+        name: ruff lint
         args: ["--fix", "--show-fixes"]
+      - id: ruff-format
+        name: ruff format
