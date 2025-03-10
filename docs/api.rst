@@ -48,7 +48,7 @@ API Reference
         Creates the option group and registers all grouped options
         which were added by :func:`option` decorator.
 
-        :param name: Group name or None for deault name
+        :param name: Group name or None for default name
         :param cls: Option group class that should be inherited from :class:`OptionGroup` class
         :param help: Group help or None for empty help
         :param attrs: Additional parameters of option group class
