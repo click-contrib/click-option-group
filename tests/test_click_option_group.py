@@ -105,7 +105,19 @@ def test_missing_group_decl_first_api(runner):
     def cli(**params):
         pass
 
-    result = runner.invoke(cli, ["--help"])
+    # FIXME: https://github.com/click-contrib/click-option-group/issues/65
+    #  Now we just do not check not attached options for --help
+    #  because handle_parse_result is not called in click >=8.1.8 for --help
+
+    # result = runner.invoke(cli, ["--help"])
+    #
+    # assert result.exception
+    # assert isinstance(result.exception, TypeError)
+    # assert "Missing option group decorator" in str(result.exc_info[1])
+    # assert "--foo" in str(result.exc_info[1])
+    # assert "--bar" in str(result.exc_info[1])
+
+    result = runner.invoke(cli, [])
 
     assert result.exception
     assert isinstance(result.exception, TypeError)
@@ -113,19 +125,11 @@ def test_missing_group_decl_first_api(runner):
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
 
-    result = runner.invoke(cli, [])
-
-    assert result.exception
-    assert isinstance(result.exception, TypeError)
-    assert "Missing option group" in str(result.exc_info[1])
-    assert "--foo" in str(result.exc_info[1])
-    assert "--bar" in str(result.exc_info[1])
-
     result = runner.invoke(cli, ["--hello1", "hello1"])
 
     assert result.exception
     assert isinstance(result.exception, TypeError)
-    assert "Missing option group" in str(result.exc_info[1])
+    assert "Missing option group decorator" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
 
@@ -133,7 +137,7 @@ def test_missing_group_decl_first_api(runner):
 
     assert result.exception
     assert isinstance(result.exception, TypeError)
-    assert "Missing option group" in str(result.exc_info[1])
+    assert "Missing option group decorator" in str(result.exc_info[1])
     assert "--foo" in str(result.exc_info[1])
     assert "--bar" in str(result.exc_info[1])
 
