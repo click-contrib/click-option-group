@@ -97,7 +97,7 @@ class _OptGroup:
         help: Optional[str] = None,
         cls: Optional[Type[OptionGroup]] = None,
         **attrs,
-    ):
+    ) -> Decorator:
         """The decorator creates a new group and collects its options
 
         Creates the option group and registers all grouped options
