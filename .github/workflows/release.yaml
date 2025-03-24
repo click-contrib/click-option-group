@@ -39,14 +39,14 @@ jobs:
           path: dist
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-  release:
-    needs: [ upload_pypi ]
-    name: Create release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: softprops/action-gh-release@v2
-        with:
-          name: click-option-group ${{ github.ref_name }}
-          prerelease: ${{ contains(github.ref, 'rc') }}
-          generate_release_notes: true
+#  release:
+#    needs: [ upload_pypi ]
+#    name: Create release
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: softprops/action-gh-release@v2
+#        with:
+#          name: click-option-group ${{ github.ref_name }}
+#          prerelease: ${{ contains(github.ref, 'rc') }}
+#          generate_release_notes: true
