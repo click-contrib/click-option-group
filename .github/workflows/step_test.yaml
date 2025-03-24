@@ -14,17 +14,14 @@ jobs:
       - uses: pre-commit/action@v3.0.1
 
   checks:
-    name: Check with Python ${{ matrix.python-version }} ${{ matrix.experimental && '(Experimental)' }}
+    name: Check with Python ${{ matrix.python-version }}
     needs: [ pre-commit ]
-    continue-on-error: ${{ matrix.experimental || false }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11", "3.12" ]
-        include:
-          - python-version: "3.13"
-            experimental: true
+        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
