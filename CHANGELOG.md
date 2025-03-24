@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.7 (24.03.2025)
+
+* Add return type Decorator (PR [#68](https://github.com/click-contrib/click-option-group/pull/68))
+* Update CI/CD config and Python versions (PR [#69](https://github.com/click-contrib/click-option-group/pull/69))
+* Fix tests for click>=8.1.8 (PR [#70](https://github.com/click-contrib/click-option-group/pull/70))
+
 ## v0.5.6 (09.06.2023)
 
 * Add `optgroup.help_option` decorator to add help option to the group (PR [#50](https://github.com/click-contrib/click-option-group/pull/50))
