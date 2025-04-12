@@ -1,4 +1,4 @@
-name: Prepare release
+name: Create release
 
 on:
   push:
@@ -18,11 +18,13 @@ permissions:
 jobs:
   tests:
     uses: ./.github/workflows/step_test.yaml
+
   build-wheel:
     needs: [ tests ]
     uses: ./.github/workflows/step_build-wheel.yaml
     with:
       ref: ${{ inputs.ref }}
+
   upload_pypi:
     name: Upload to PyPI repository
     needs: [ tests, build-wheel ]
@@ -32,6 +34,8 @@ jobs:
       url: https://pypi.org/project/click-option-group/
     permissions:
       id-token: write
+      contents: write
+
     steps:
       - uses: actions/download-artifact@v4.1.7
         with:
@@ -39,14 +43,15 @@ jobs:
           path: dist
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-#  release:
-#    needs: [ upload_pypi ]
-#    name: Create release
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: softprops/action-gh-release@v2
-#        with:
-#          name: click-option-group ${{ github.ref_name }}
-#          prerelease: ${{ contains(github.ref, 'rc') }}
-#          generate_release_notes: true
+
+  release:
+    needs: [ upload_pypi ]
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: click-option-group ${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref, 'rc') }}
+          generate_release_notes: true
