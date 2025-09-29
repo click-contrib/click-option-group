@@ -115,7 +115,7 @@ class _OptGroup:
             msg = "'cls' must be a subclass of 'OptionGroup' class."
             raise TypeError(msg)
 
-        def decorator(func):
+        def decorator(func: F) -> F:
             callback, params = get_callback_and_params(func)
 
             if callback not in self._decorating_state:
@@ -163,7 +163,7 @@ class _OptGroup:
         :param attrs: additional option attributes and parameters
         """
 
-        def decorator(func):
+        def decorator(func: F) -> F:
             callback, params = get_callback_and_params(func)
 
             option_stack = self._decorating_state[callback]
