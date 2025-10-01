@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.8 (01.10.2025)
+
+* Fix some types for pyright linter (PR [#72](https://github.com/click-contrib/click-option-group/pull/72))
+
 ## v0.5.7 (24.03.2025)
 
 * Add return type Decorator (PR [#68](https://github.com/click-contrib/click-option-group/pull/68))
