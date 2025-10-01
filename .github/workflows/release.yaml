@@ -48,6 +48,9 @@ jobs:
     needs: [ upload_pypi ]
     name: Create release
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: softprops/action-gh-release@v2
