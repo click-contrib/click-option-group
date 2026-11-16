@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+* Fix `AllOptionGroup` validation to count options provided through environment variables as set, while excluding defaults (PR [#74](https://github.com/click-contrib/click-option-group/pull/74))
+* Update CI Python test matrix to Python 3.10–3.15 (PR [#75](https://github.com/click-contrib/click-option-group/pull/75))
+* Fix Read the Docs build configuration
+
 ## v0.5.9 (09.10.2025)
 
 * Fix use of mypy while maintaining pyright compatibility (PR [#73](https://github.com/click-contrib/click-option-group/pull/73))
