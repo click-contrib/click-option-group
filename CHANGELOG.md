@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.5.10 (16.11.2026)
 
 * Fix `AllOptionGroup` validation to count options provided through environment variables as set, while excluding defaults (PR [#74](https://github.com/click-contrib/click-option-group/pull/74))
 * Update CI Python test matrix to Python 3.10–3.15 (PR [#75](https://github.com/click-contrib/click-option-group/pull/75))
