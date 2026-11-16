@@ -323,6 +323,104 @@ def test_all_option_group(runner):
     assert "foo,bar" in result.output
 
 
+@pytest.fixture()
+def clean_group_env(monkeypatch):
+    monkeypatch.delenv("COG_FOO", raising=False)
+    monkeypatch.delenv("COG_BAR", raising=False)
+
+
+@pytest.mark.usefixtures("clean_group_env")
+@pytest.mark.parametrize(
+    ("args", "env", "exit_code", "output"),
+    [
+        (["--foo", "cli"], {"COG_BAR": "env"}, 0, "cli,env"),
+        ([], {"COG_FOO": "foo", "COG_BAR": "bar"}, 0, "foo,bar"),
+        (["--bar", "cli"], {"COG_FOO": "env"}, 0, "env,cli"),
+        ([], {"COG_FOO": "foo"}, 2, "All options from"),
+        (["--foo", "cli"], {"COG_BAR": ""}, 2, "All options from"),
+        ([], {"COG_FOO": "", "COG_BAR": ""}, 0, "None,None"),
+        (["--foo", "cli", "--bar", "cli"], {"COG_FOO": "env"}, 0, "cli,cli"),
+    ],
+)
+def test_all_option_group_envvars(runner, args, env, exit_code, output):
+    @click.command()
+    @optgroup.group(cls=AllOptionGroup)
+    @optgroup.option("--foo", envvar="COG_FOO")
+    @optgroup.option("--bar", envvar="COG_BAR")
+    def cli(foo, bar):
+        click.echo(f"{foo},{bar}")
+
+    result = runner.invoke(cli, args, env=env)
+    assert result.exit_code == exit_code
+    assert output in result.output
+
+
+@pytest.mark.usefixtures("clean_group_env")
+def test_all_option_group_auto_envvar_prefix(runner):
+    @click.command(context_settings={"auto_envvar_prefix": "COG"})
+    @optgroup.group(cls=AllOptionGroup)
+    @optgroup.option("--foo")
+    @optgroup.option("--bar")
+    def cli(foo, bar):
+        click.echo(f"{foo},{bar}")
+
+    result = runner.invoke(cli, ["--foo", "cli"], env={"COG_BAR": "env"})
+    assert result.exit_code == 0
+    assert "cli,env" in result.output
+
+
+@pytest.mark.usefixtures("clean_group_env")
+def test_all_option_group_false_flag_envvar(runner):
+    @click.command()
+    @optgroup.group(cls=AllOptionGroup)
+    @optgroup.option("--foo/--no-foo", envvar="COG_FOO")
+    @optgroup.option("--bar")
+    def cli(foo, bar):
+        click.echo(f"{foo},{bar}")
+
+    result = runner.invoke(cli, ["--bar", "cli"], env={"COG_FOO": "0"})
+    assert result.exit_code == 0
+    assert "False,cli" in result.output
+
+
+@pytest.mark.usefixtures("clean_group_env")
+def test_all_option_group_multiple_envvar(runner):
+    @click.command()
+    @optgroup.group(cls=AllOptionGroup)
+    @optgroup.option("--foo", multiple=True, envvar="COG_FOO")
+    @optgroup.option("--bar")
+    def cli(foo, bar):
+        click.echo(f"{','.join(foo)},{bar}")
+
+    result = runner.invoke(cli, ["--bar", "cli"], env={"COG_FOO": "one two"})
+    assert result.exit_code == 0
+    assert "one,two,cli" in result.output
+
+
+def test_all_option_group_defaults_do_not_count_as_provided(runner):
+    calls = []
+
+    def default():
+        calls.append(True)
+        return "default"
+
+    @click.command()
+    @optgroup.group(cls=AllOptionGroup)
+    @optgroup.option("--foo", default=default)
+    @optgroup.option("--bar")
+    def cli(foo, bar):
+        click.echo(f"{foo},{bar}")
+
+    result = runner.invoke(cli, ["--bar", "cli"])
+    assert result.exit_code == 2
+    assert calls == []
+
+    result = runner.invoke(cli, [])
+    assert result.exit_code == 0
+    assert "default,None" in result.output
+    assert calls == [True]
+
+
 def test_required_all_option_group(runner):
     group = RequiredAllOptionGroup()
     assert group.name_extra == ["required_all"]
