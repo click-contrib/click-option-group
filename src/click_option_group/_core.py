@@ -419,9 +419,13 @@ class AllOptionGroup(OptionGroup):
         return [*super().name_extra, "all_or_none"]
 
     def handle_parse_result(self, option: GroupedOption, ctx: click.Context, opts: Mapping[str, Any]) -> None:
-        option_names = set(self.get_options(ctx))
+        options = self.get_options(ctx)
+        option_names = set(options)
+        given_option_names = {
+            name for name, opt in options.items() if name in opts or opt.value_from_envvar(ctx) is not None
+        }
 
-        if not option_names.isdisjoint(opts) and option_names.intersection(opts) != option_names:
+        if given_option_names and given_option_names != option_names:
             group_name = self._group_name_str()
             option_info = self.get_error_hint(ctx)
 

@@ -201,6 +201,7 @@ The specific behavior can be implemented by using the inheritance, mainly, in :c
 
 - :class:`RequiredAnyOptionGroup` -- At least one option from the group must be set
 - :class:`AllOptionGroup` --  All options from the group must be set or none must be set
+  (command-line arguments and environment variables count as set; defaults do not)
 - :class:`RequiredAllOptionGroup` --  All options from the group must be set
 - :class:`MutuallyExclusiveOptionGroup` -- Only one or none option from the group must be set
 - :class:`RequiredMutuallyExclusiveOptionGroup` -- Only one required option from the group must be set
